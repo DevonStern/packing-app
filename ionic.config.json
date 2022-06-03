@@ -1,0 +1,7 @@
+{
+  "name": "packing-app",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}
