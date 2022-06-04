@@ -12,9 +12,9 @@ const ListPage: React.FC = () => {
 
 	const [isAddItemInputOpen, setIsAddItemInputOpen] = useState<boolean>(false)
 
-	const clearStorage = () => {
-		Storage.clear()
-	}
+	// const clearStorage = () => {
+	// 	Storage.clear()
+	// }
 	
 	return (
 		<IonPage>
@@ -34,7 +34,7 @@ const ListPage: React.FC = () => {
 						return <ItemRow key={'item-' + index} item={item} />
 					})}
 				</IonList>
-				<IonButton onClick={clearStorage}>Clear storage</IonButton>
+				{/* <IonButton onClick={clearStorage}>Clear storage</IonButton> */}
 				<IonFab horizontal="center" vertical="bottom" style={{ paddingBottom: '60px' }}>
 					<IonFabButton onClick={() => setIsAddItemInputOpen(true)}>
 						<IonIcon icon={add} size="large" />
