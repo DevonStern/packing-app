@@ -1,6 +1,5 @@
 import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from "@ionic/react"
 import { trash } from "ionicons/icons"
-import { PropsWithChildren } from "react"
 import { useRecoilState } from "recoil"
 import { Item, itemsState } from "./ItemModel"
 
