@@ -1,7 +1,7 @@
 import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from "@ionic/react"
 import { trash } from "ionicons/icons"
-import { useRecoilState } from "recoil"
-import { Item, itemsState } from "./ItemModel"
+import { useRecoilState, useSetRecoilState } from "recoil"
+import { currentItemIdState, Item, itemsState } from "./ItemModel"
 
 interface ItemRowProps {
 	item: Item
@@ -9,6 +9,11 @@ interface ItemRowProps {
 
 const ItemRow: React.FC<ItemRowProps> = ({ item }) => {
 	const [items, setItems] = useRecoilState(itemsState)
+	const setCurrentItemId = useSetRecoilState(currentItemIdState)
+
+	const goToItem = () => {
+		setCurrentItemId(item.id)
+	}
 
 	const deleteItem = () => {
 		const newItems: Item[] = items.filter(i => i.id !== item.id)
@@ -18,7 +23,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item }) => {
 	return (
 		<>
 			<IonItemSliding>
-				<IonItem>
+				<IonItem onClick={goToItem}>
 					{item.name}
 				</IonItem>
 				<IonItemOptions side="start">

@@ -1,7 +1,7 @@
-import { IonButton, IonInput, IonModal } from "@ionic/react"
+import { IonButton, IonInput, IonItem, IonLabel, IonModal } from "@ionic/react"
 import { useState } from "react"
 import { useRecoilState } from "recoil"
-import { Item, itemsState } from "./ItemModel"
+import { Item, itemsState, ItemState } from "./ItemModel"
 import { v4 as uuid } from "uuid";
 
 interface AddItemInputProps {
@@ -24,6 +24,7 @@ const AddItemInput: React.FC<AddItemInputProps> = ({ isOpen, setIsOpen }) => {
 		const newItem: Item = {
 			id: uuid(),
 			name: name.trim(),
+			state: ItemState.NEED,
 		}
 		const newItems: Item[] = [
 			...items,
@@ -37,15 +38,16 @@ const AddItemInput: React.FC<AddItemInputProps> = ({ isOpen, setIsOpen }) => {
 		<IonModal
 			isOpen={isOpen}
 		>
-			<div>
+			<IonItem>
+				<IonLabel>Item:</IonLabel>
 				<IonInput
 					value={name}
-					placeholder="Item"
+					placeholder="Banjo"
 					onIonChange={event => changeHandler(event.detail.value)}
 				/>
-			</div>
+			</IonItem>
 			<IonButton expand="block" onClick={addItem}>Add</IonButton>
-			<IonButton expand="block" onClick={() => setIsOpen(false)}>Close</IonButton>
+			<IonButton onClick={() => setIsOpen(false)}>Close</IonButton>
 		</IonModal>
 	)
 }
