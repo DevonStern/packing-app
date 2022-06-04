@@ -37,7 +37,7 @@ const ItemPage: React.FC = () => {
 					<IonLabel>State: {ItemState[currentItem.state]}</IonLabel>
 				</IonItem>
 				<IonButton expand="block" disabled={isLastState} onClick={moveState}>
-					{!isLastState ? ItemState[nextState] : ItemState[currentItem.state]}
+					{!isLastState ? ItemState[nextState] : 'Ready'}
 				</IonButton>
 				<IonButton onClick={() => setCurrentItemId(undefined)}>Back</IonButton>
 			</IonContent>

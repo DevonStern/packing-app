@@ -1,5 +1,6 @@
 import { atom, AtomEffect, DefaultValue, selectorFamily } from "recoil"
 import { Storage } from "@capacitor/storage";
+import { v4 as uuid } from "uuid";
 
 export interface Item {
 	id: string
@@ -14,19 +15,30 @@ export enum ItemState {
 	LOADED,
 }
 
-const startingItems: Item[] = [
-	{ id: '1', name: 'Test', state: ItemState.NEED },
-	{ id: '2', name: 'Test 2', state: ItemState.NEED },
-	{ id: '3', name: 'Test 3', state: ItemState.NEED },
-]
+export const makeItem = (name: string): Item => ({
+	id: uuid(),
+	name,
+	state: ItemState.NEED,
+})
 
-const itemPersistenceEffect: AtomEffect<Item[]> = ({setSelf, onSet}) => {
+const itemsRestorer = (savedItems: any): Item[] => {
+	const items: Item[] = savedItems.map((item: Item) => {
+		const updatedItem: Item = { ...item }
+		if (!item.state) {
+			updatedItem.state = ItemState.NEED
+		}
+		return updatedItem
+	})
+	return items
+}
+
+const itemPersistenceEffect: AtomEffect<Item[]> = ({ setSelf, onSet }) => {
 	Storage.get({ key: 'items' })
 		.then(({ value }) => {
 			if (!value) return
-			setSelf(JSON.parse(value))
+			setSelf(itemsRestorer(JSON.parse(value)))
 		})
-	
+
 	onSet(newValue => {
 		Storage.set({ key: 'items', value: JSON.stringify(newValue) })
 	})
@@ -34,7 +46,7 @@ const itemPersistenceEffect: AtomEffect<Item[]> = ({setSelf, onSet}) => {
 
 export const itemsState = atom<Item[]>({
 	key: 'itemsState',
-	default: startingItems,
+	default: [],
 	effects: [
 		itemPersistenceEffect,
 	],

@@ -1,8 +1,7 @@
 import { IonButton, IonInput, IonItem, IonLabel, IonModal } from "@ionic/react"
 import { useState } from "react"
 import { useRecoilState } from "recoil"
-import { Item, itemsState, ItemState } from "./ItemModel"
-import { v4 as uuid } from "uuid";
+import { Item, itemsState, ItemState, makeItem } from "./ItemModel"
 
 interface AddItemInputProps {
 	isOpen: boolean
@@ -21,11 +20,7 @@ const AddItemInput: React.FC<AddItemInputProps> = ({ isOpen, setIsOpen }) => {
 	const addItem = () => {
 		if (!name.trim()) return
 
-		const newItem: Item = {
-			id: uuid(),
-			name: name.trim(),
-			state: ItemState.NEED,
-		}
+		const newItem: Item = makeItem(name.trim())
 		const newItems: Item[] = [
 			...items,
 			newItem
