@@ -1,6 +1,7 @@
-import { atom, AtomEffect, DefaultValue, selectorFamily } from "recoil"
-import { Storage } from "@capacitor/storage";
+import { atom, DefaultValue, selector } from "recoil"
 import { v4 as uuid } from "uuid";
+import { currentListState, List } from "../lists/ListModel";
+import { makeCurrentObjectSelector } from "../utils/persistenceUtils";
 
 export interface Item {
 	id: string
@@ -15,41 +16,41 @@ export enum ItemState {
 	LOADED,
 }
 
+const DEFAULT_ITEM_STATE = ItemState.NEED
+
 export const makeItem = (name: string): Item => ({
 	id: uuid(),
 	name,
-	state: ItemState.NEED,
+	state: DEFAULT_ITEM_STATE,
 })
 
-const itemsRestorer = (savedItems: any): Item[] => {
+export const itemsRestorer = (savedItems: any): Item[] => {
 	const items: Item[] = savedItems.map((item: Item) => {
-		const updatedItem: Item = { ...item }
-		if (!item.state) {
-			updatedItem.state = ItemState.NEED
+		const state: ItemState = item.state ?? DEFAULT_ITEM_STATE
+		const updatedItem: Item = {
+			...item,
+			state
 		}
 		return updatedItem
 	})
 	return items
 }
 
-const itemPersistenceEffect: AtomEffect<Item[]> = ({ setSelf, onSet }) => {
-	Storage.get({ key: 'items' })
-		.then(({ value }) => {
-			if (!value) return
-			setSelf(itemsRestorer(JSON.parse(value)))
-		})
-
-	onSet(newValue => {
-		Storage.set({ key: 'items', value: JSON.stringify(newValue) })
-	})
-}
-
-export const itemsState = atom<Item[]>({
+export const itemsState = selector<Item[]>({
 	key: 'itemsState',
-	default: [],
-	effects: [
-		itemPersistenceEffect,
-	],
+	get: ({ get }) => {
+		return get(currentListState).items
+	},
+	set: ({ get, set }, updatedItems) => {
+		if (updatedItems instanceof DefaultValue) {
+			throw new Error("I don't know what the heck is going on.")
+		}
+		const updatedList: List = {
+			...get(currentListState),
+			items: updatedItems
+		}
+		set(currentListState, updatedList)
+	}
 })
 
 export const currentItemIdState = atom<string | undefined>({
@@ -57,35 +58,4 @@ export const currentItemIdState = atom<string | undefined>({
 	default: undefined,
 })
 
-export const currentItemState = selectorFamily<Item, string | undefined>({
-	key: 'currentItemState',
-	get: id => ({ get }) => {
-		if (!id) {
-			throw new Error("Where's the ID?")
-		}
-		const currentItem: Item | undefined = get(itemsState).find(item => item.id === id)
-		if (!currentItem) {
-			throw new Error("Where'd the item go?")
-		}
-		return currentItem
-	},
-	set: id => ({ get, set }, updatedItem) => {
-		if (!id) {
-			throw new Error("Where's the ID?")
-		}
-		if (updatedItem instanceof DefaultValue) {
-			throw new Error("I don't know what the heck is going on.")
-		}
-		const currentItem: Item | undefined = get(itemsState).find(item => item.id === id)
-		if (!currentItem) {
-			throw new Error("Where'd the item go?")
-		}
-		const updatedItems: Item[] = get(itemsState).map(item => {
-			if (currentItem.id === item.id) {
-				return updatedItem
-			}
-			return item
-		})
-		set(itemsState, updatedItems)
-	},
-})
+export const currentItemState = makeCurrentObjectSelector('currentItemState', itemsState, currentItemIdState)

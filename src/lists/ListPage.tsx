@@ -4,11 +4,13 @@ import { add } from 'ionicons/icons';
 import { useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import AddItemInput from '../items/AddItemInput';
-import { itemsState } from '../items/ItemModel';
+import { Item } from '../items/ItemModel';
 import ItemRow from '../items/ItemRow';
+import { currentListState } from './ListModel';
 
 const ListPage: React.FC = () => {
-	const items = useRecoilValue(itemsState)
+	const currentList = useRecoilValue(currentListState)
+	console.log(currentList)
 
 	const [isAddItemInputOpen, setIsAddItemInputOpen] = useState<boolean>(false)
 
@@ -30,7 +32,7 @@ const ListPage: React.FC = () => {
 					</IonToolbar>
 				</IonHeader>
 				<IonList>
-					{items.map((item, index) => {
+					{currentList.items.map((item, index) => {
 						return <ItemRow key={'item-' + index} item={item} />
 					})}
 				</IonList>

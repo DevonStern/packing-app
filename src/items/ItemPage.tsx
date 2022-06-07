@@ -1,13 +1,13 @@
 import { IonButton, IonContent, IonHeader, IonInput, IonItem, IonLabel, IonPage, IonTitle, IonToolbar } from "@ionic/react"
 import { useRef, useState } from "react"
-import { useRecoilState, useRecoilValue } from "recoil"
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil"
 import useInputFocus from "../hooks/useInputFocus"
 import { getNextItemState } from "../utils/utils"
 import { currentItemIdState, currentItemState, Item, ItemState } from "./ItemModel"
 
 const ItemPage: React.FC = () => {
-	const [currentItemId, setCurrentItemId] = useRecoilState(currentItemIdState)
-	const [currentItem, setCurrentItem] = useRecoilState(currentItemState(currentItemId))
+	const setCurrentItemId = useSetRecoilState(currentItemIdState)
+	const [currentItem, setCurrentItem] = useRecoilState(currentItemState)
 
 	//All keys and values are included in the array for reverse lookup, so divide by 2
 	const numStates: number = Object.values(ItemState).length / 2
@@ -52,8 +52,7 @@ interface ItemNameProps {
 }
 
 const ItemName: React.FC<ItemNameProps> = ({ isTitleLarge }) => {
-	const currentItemId = useRecoilValue(currentItemIdState)
-	const currentItem = useRecoilValue(currentItemState(currentItemId))
+	const currentItem = useRecoilValue(currentItemState)
 
 	const [isEditingName, setIsEditingName] = useState<boolean>(false)
 
@@ -79,8 +78,7 @@ interface ItemNameInputProps {
 }
 
 const ItemNameInput: React.FC<ItemNameInputProps> = ({ setIsEditingName }) => {
-	const currentItemId = useRecoilValue(currentItemIdState)
-	const [currentItem, setCurrentItem] = useRecoilState(currentItemState(currentItemId))
+	const [currentItem, setCurrentItem] = useRecoilState(currentItemState)
 
 	const [name, setName] = useState<string>(currentItem.name)
 
