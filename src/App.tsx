@@ -10,10 +10,10 @@ import {
 	setupIonicReact
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { ellipse, square, triangle } from 'ionicons/icons';
+import { ellipse, person, square, triangle } from 'ionicons/icons';
 import MasterListTab from './tabs/MasterListTab';
 import ListsTab from './tabs/ListsTab';
-import Tab3 from './tabs/Tab3';
+import PersonsTab from './tabs/PersonsTab';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -45,8 +45,8 @@ const App: React.FC = () => (
 						<MasterListTab />
 					</Route>
 					<ListsTab />
-					<Route path="/tab3">
-						<Tab3 />
+					<Route path="/person">
+						<PersonsTab />
 					</Route>
 					<Route exact path="/">
 						<Redirect to="/list" />
@@ -61,9 +61,9 @@ const App: React.FC = () => (
 						<IonIcon icon={ellipse} />
 						<IonLabel>Lists</IonLabel>
 					</IonTabButton>
-					<IonTabButton tab="tab3" href="/tab3">
-						<IonIcon icon={square} />
-						<IonLabel>Tab 3</IonLabel>
+					<IonTabButton tab="person" href="/person">
+						<IonIcon icon={person} />
+						<IonLabel>People</IonLabel>
 					</IonTabButton>
 				</IonTabBar>
 			</IonTabs>
