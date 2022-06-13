@@ -1,43 +1,17 @@
-import { IonButton, IonContent, IonHeader, IonInput, IonItem, IonLabel, IonPage, IonTitle, IonToolbar } from "@ionic/react"
+import { IonBackButton, IonButtons, IonContent, IonHeader, IonInput, IonPage, IonTitle, IonToolbar } from "@ionic/react"
 import { useRef, useState } from "react"
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil"
+import { useRecoilState, useRecoilValue } from "recoil"
 import useInputFocus from "../hooks/useInputFocus"
-import { getNextItemState } from "../utils/utils"
-import { currentItemIdState, currentItemState, Item, ItemState } from "./ItemModel"
+import { currentItemState, Item } from "./ItemModel"
+import ItemView from "./ItemView"
 
 const ItemPage: React.FC = () => {
-	const setCurrentItemId = useSetRecoilState(currentItemIdState)
-	const [currentItem, setCurrentItem] = useRecoilState(currentItemState)
-
-	//All keys and values are included in the array for reverse lookup, so divide by 2
-	const numStates: number = Object.values(ItemState).length / 2
-	const isLastState: boolean = currentItem.state.valueOf() === numStates - 1
-	const nextState: ItemState = getNextItemState(currentItem.state)
-
-	const moveState = () => {
-		const updatedItem: Item = {
-			...currentItem,
-			state: nextState,
-		}
-		setCurrentItem(updatedItem)
-	}
-
 	return (
 		<IonPage>
-			<IonHeader>
-				<ItemName isTitleLarge={false} />
-			</IonHeader>
+			<Header isMain={true} />
 			<IonContent fullscreen>
-				<IonHeader collapse="condense">
-					<ItemName isTitleLarge={true} />
-				</IonHeader>
-				<IonItem>
-					<IonLabel>State: {ItemState[currentItem.state]}</IonLabel>
-				</IonItem>
-				<IonButton expand="block" disabled={isLastState} onClick={moveState}>
-					{!isLastState ? ItemState[nextState] : 'Ready'}
-				</IonButton>
-				<IonButton onClick={() => setCurrentItemId(undefined)}>Back</IonButton>
+				<Header isMain={false} />
+				<ItemView />
 			</IonContent>
 		</IonPage>
 	)
@@ -47,27 +21,30 @@ export default ItemPage
 
 
 
-interface ItemNameProps {
-	isTitleLarge: boolean
+interface HeaderProps {
+	isMain: boolean
 }
 
-const ItemName: React.FC<ItemNameProps> = ({ isTitleLarge }) => {
+const Header: React.FC<HeaderProps> = ({ isMain }) => {
 	const currentItem = useRecoilValue(currentItemState)
 
 	const [isEditingName, setIsEditingName] = useState<boolean>(false)
 
 	return (
-		<>
-			{!isEditingName ?
-				<IonToolbar onClick={() => setIsEditingName(true)}>
-					<IonTitle size={isTitleLarge ? 'large' : undefined}>{currentItem.name}</IonTitle>
-				</IonToolbar>
-				:
-				<IonToolbar>
+		<IonHeader collapse={isMain ? undefined : 'condense'}>
+			<IonToolbar>
+				<IonButtons slot="start">
+					<IonBackButton />
+				</IonButtons>
+				{!isEditingName ?
+					<IonTitle size={isMain ? undefined : 'large'} onClick={() => setIsEditingName(true)}>
+						{currentItem.name}
+					</IonTitle>
+					:
 					<ItemNameInput setIsEditingName={setIsEditingName} />
-				</IonToolbar>
-			}
-		</>
+				}
+			</IonToolbar>
+		</IonHeader>
 	)
 }
 

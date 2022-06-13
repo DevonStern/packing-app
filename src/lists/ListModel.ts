@@ -1,4 +1,4 @@
-import { atom } from "recoil"
+import { atom, DefaultValue, selector } from "recoil"
 import { Item, itemsRestorer } from "../items/ItemModel"
 import { v4 as uuid } from "uuid";
 import { makeCurrentObjectSelector, makePersistenceEffect } from "../utils/persistenceUtils";
@@ -35,7 +35,7 @@ const MASTER_LIST_ID = 'masterId'
 
 const defaultMasterList: List = {
 	id: MASTER_LIST_ID,
-	name: 'Master List',
+	name: 'Master',
 	items: [],
 	isMaster: true,
 }
@@ -50,7 +50,24 @@ export const listsState = atom<List[]>({
 
 export const currentListIdState = atom<string | undefined>({
 	key: 'currentListIdState',
-	default: MASTER_LIST_ID,
+	default: undefined,
 })
 
 export const currentListState = makeCurrentObjectSelector('currentListState', listsState, currentListIdState)
+
+export const masterListState = selector<List>({
+	key: 'masterListState',
+	get: ({ get }) => {
+		return get(listsState)[0]
+	},
+	set: ({ get, set }, updatedMasterList) => {
+		if (updatedMasterList instanceof DefaultValue) {
+			throw new Error("I don't know what the heck is going on.")
+		}
+		const updatedLists: List[] = [
+			updatedMasterList,
+			...get(listsState).slice(1)
+		]
+		set(listsState, updatedLists)
+	}
+})

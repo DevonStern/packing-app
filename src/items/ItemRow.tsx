@@ -1,6 +1,8 @@
 import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from "@ionic/react"
 import { trash } from "ionicons/icons"
-import { useRecoilState, useSetRecoilState } from "recoil"
+import { useHistory } from "react-router"
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil"
+import { currentListIdState } from "../lists/ListModel"
 import { currentItemIdState, Item, itemsState } from "./ItemModel"
 
 interface ItemRowProps {
@@ -10,9 +12,13 @@ interface ItemRowProps {
 const ItemRow: React.FC<ItemRowProps> = ({ item }) => {
 	const [items, setItems] = useRecoilState(itemsState)
 	const setCurrentItemId = useSetRecoilState(currentItemIdState)
+	const listId = useRecoilValue(currentListIdState)
+
+	const history = useHistory()
 
 	const goToItem = () => {
 		setCurrentItemId(item.id)
+		history.push(`/list/${listId}/item/${item.id}`)
 	}
 
 	const deleteItem = () => {

@@ -1,15 +1,15 @@
 import { IonButton, IonInput, IonItem, IonLabel, IonModal } from "@ionic/react"
 import { useState } from "react"
 import { useRecoilState } from "recoil"
-import { Item, itemsState, makeItem } from "./ItemModel"
+import { List, listsState, makeList } from "./ListModel"
 
-interface AddItemInputProps {
+interface AddListInputProps {
 	isOpen: boolean
 	setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const AddItemInput: React.FC<AddItemInputProps> = ({ isOpen, setIsOpen }) => {
-	const [items, setItems] = useRecoilState(itemsState)
+const AddListInput: React.FC<AddListInputProps> = ({ isOpen, setIsOpen }) => {
+	const [lists, setLists] = useRecoilState(listsState)
 
 	const [name, setName] = useState<string>('')
 
@@ -17,15 +17,15 @@ const AddItemInput: React.FC<AddItemInputProps> = ({ isOpen, setIsOpen }) => {
 		setName(value ?? '')
 	}
 
-	const addItem = () => {
+	const addList = () => {
 		if (!name.trim()) return
 
-		const newItem: Item = makeItem(name.trim())
-		const newItems: Item[] = [
-			...items,
-			newItem
+		const newList: List = makeList(name.trim())
+		const newLists: List[] = [
+			...lists,
+			newList
 		]
-		setItems(newItems)
+		setLists(newLists)
 		setName('')
 	}
 
@@ -34,17 +34,17 @@ const AddItemInput: React.FC<AddItemInputProps> = ({ isOpen, setIsOpen }) => {
 			isOpen={isOpen}
 		>
 			<IonItem>
-				<IonLabel>Item:</IonLabel>
+				<IonLabel>Trip:</IonLabel>
 				<IonInput
 					value={name}
-					placeholder="Banjo"
+					placeholder="Italy"
 					onIonChange={event => changeHandler(event.detail.value)}
 				/>
 			</IonItem>
-			<IonButton expand="block" onClick={addItem}>Add</IonButton>
+			<IonButton expand="block" onClick={addList}>Add</IonButton>
 			<IonButton onClick={() => setIsOpen(false)}>Close</IonButton>
 		</IonModal>
 	)
 }
 
-export default AddItemInput
+export default AddListInput
