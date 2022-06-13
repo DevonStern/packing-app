@@ -3,12 +3,7 @@ import { useState } from "react"
 import { useRecoilState } from "recoil"
 import { List, listsState, makeList } from "./ListModel"
 
-interface AddListInputProps {
-	isOpen: boolean
-	setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
-}
-
-const AddListInput: React.FC<AddListInputProps> = ({ isOpen, setIsOpen }) => {
+const AddListInput: React.FC = () => {
 	const [lists, setLists] = useRecoilState(listsState)
 
 	const [name, setName] = useState<string>('')
@@ -30,9 +25,7 @@ const AddListInput: React.FC<AddListInputProps> = ({ isOpen, setIsOpen }) => {
 	}
 
 	return (
-		<IonModal
-			isOpen={isOpen}
-		>
+		<>
 			<IonItem>
 				<IonLabel>Trip:</IonLabel>
 				<IonInput
@@ -42,8 +35,7 @@ const AddListInput: React.FC<AddListInputProps> = ({ isOpen, setIsOpen }) => {
 				/>
 			</IonItem>
 			<IonButton expand="block" onClick={addList}>Add</IonButton>
-			<IonButton onClick={() => setIsOpen(false)}>Close</IonButton>
-		</IonModal>
+		</>
 	)
 }
 

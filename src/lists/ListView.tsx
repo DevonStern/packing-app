@@ -5,6 +5,7 @@ import AddItemInput from "../items/AddItemInput"
 import ItemRow from "../items/ItemRow"
 import { currentListState } from "./ListModel"
 import { add } from 'ionicons/icons';
+import Modal from "../general/Modal"
 
 const ListView: React.FC = () => {
 	const currentList = useRecoilValue(currentListState)
@@ -23,7 +24,9 @@ const ListView: React.FC = () => {
 					<IonIcon icon={add} size="large" />
 				</IonFabButton>
 			</IonFab>
-			<AddItemInput isOpen={isAddItemInputOpen} setIsOpen={setIsAddItemInputOpen} />
+			<Modal isOpen={isAddItemInputOpen} setIsOpen={setIsAddItemInputOpen}>
+				<AddItemInput />
+			</Modal>
 		</>
 	)
 }

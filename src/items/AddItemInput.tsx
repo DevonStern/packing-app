@@ -3,12 +3,7 @@ import { useState } from "react"
 import { useRecoilState } from "recoil"
 import { Item, itemsState, makeItem } from "./ItemModel"
 
-interface AddItemInputProps {
-	isOpen: boolean
-	setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
-}
-
-const AddItemInput: React.FC<AddItemInputProps> = ({ isOpen, setIsOpen }) => {
+const AddItemInput: React.FC = () => {
 	const [items, setItems] = useRecoilState(itemsState)
 
 	const [name, setName] = useState<string>('')
@@ -30,9 +25,7 @@ const AddItemInput: React.FC<AddItemInputProps> = ({ isOpen, setIsOpen }) => {
 	}
 
 	return (
-		<IonModal
-			isOpen={isOpen}
-		>
+		<>
 			<IonItem>
 				<IonLabel>Item:</IonLabel>
 				<IonInput
@@ -42,8 +35,7 @@ const AddItemInput: React.FC<AddItemInputProps> = ({ isOpen, setIsOpen }) => {
 				/>
 			</IonItem>
 			<IonButton expand="block" onClick={addItem}>Add</IonButton>
-			<IonButton onClick={() => setIsOpen(false)}>Close</IonButton>
-		</IonModal>
+		</>
 	)
 }
 
