@@ -1,20 +1,48 @@
-import { IonButton, IonItem, IonLabel, IonList } from "@ionic/react"
-import { useRecoilState } from "recoil"
+import { IonItem, IonLabel, IonList } from "@ionic/react"
+import { useRecoilState, useRecoilValue } from "recoil"
+import { personsState } from "../persons/PersonModel"
 import PersonSelect from "../persons/PersonSelect"
-import { getNextItemState } from "../utils/utils"
-import { currentItemState, Item, ItemState } from "./ItemModel"
+import { getItemPersonWithNextState, getLowestItemState, getNextItemState, isLastItemState } from "../utils/utils"
+import { currentItemState, Item, ItemPerson, ItemState } from "./ItemModel"
+import ItemPersonRow from "./ItemPersonRow"
+import MoveItemStateButton from "./MoveItemStateButton"
 
 const ItemView: React.FC = () => {
 	const [item, setItem] = useRecoilState(currentItemState)
+	const persons = useRecoilValue(personsState)
 
-	//All keys and values are included in the array for reverse lookup, so divide by 2
-	const numStates: number = Object.values(ItemState).length / 2
-	const isLastState: boolean = item.state.valueOf() === numStates - 1
-	const nextState: ItemState = getNextItemState(item.state)
+	const hasPersons: boolean = item.persons.length > 0
+	const lowestItemState: ItemState = hasPersons ? getLowestItemState(item.persons) : item.state
+	const stateText: string = ItemState[lowestItemState]
 
-	const moveState = () => {
-		if (isLastState) return
+	const moveWholeState = () => {
+		if (hasPersons) {
+			moveLowestItemPersonStates()
+		} else {
+			moveMainItemState()
+		}
+	}
 
+	const moveLowestItemPersonStates = () => {
+		const itemPersonsWithLowestState: ItemPerson[] = item.persons.filter(ip => ip.state === lowestItemState)
+		const updatedItemPersons: ItemPerson[] = item.persons.map(ip => {
+			const isPersonInLowestState: boolean = itemPersonsWithLowestState.some(lowestIP => lowestIP.person.id === ip.person.id)
+			if (isPersonInLowestState) {
+				return getItemPersonWithNextState(ip)
+			}
+			return ip
+		})
+		const updatedItem: Item = {
+			...item,
+			persons: updatedItemPersons
+		}
+		setItem(updatedItem)
+	}
+
+	const moveMainItemState = () => {
+		if (isLastItemState(item.state)) return
+
+		const nextState: ItemState = getNextItemState(item.state)
 		const updatedItem: Item = {
 			...item,
 			state: nextState,
@@ -25,17 +53,35 @@ const ItemView: React.FC = () => {
 	return (
 		<>
 			<IonList>
-				<IonItem>
-					<IonLabel>People</IonLabel>
-					<PersonSelect />
-				</IonItem>
-				<IonItem>
-					<IonLabel>State: {ItemState[item.state]}</IonLabel>
-				</IonItem>
+				{persons.length > 0 ? (
+					<IonItem>
+						<IonLabel>People</IonLabel>
+						<PersonSelect />
+					</IonItem>
+				) : null}
+				{hasPersons ? (
+					<>
+						<IonItem>
+							<IonList style={{ width: '100%' }}>
+								{item.persons.map((itemPerson) => (
+									<ItemPersonRow
+										key={itemPerson.person.id}
+										itemPerson={itemPerson}
+									/>
+								))}
+							</IonList>
+						</IonItem>
+						<IonItem>Overall: {stateText}</IonItem>
+					</>
+				) : (
+					<IonItem>{stateText}</IonItem>
+				)}
 			</IonList>
-			<IonButton expand="block" disabled={isLastState} onClick={moveState}>
-				{!isLastState ? ItemState[nextState] : 'Ready'}
-			</IonButton>
+			<MoveItemStateButton
+				expand="block"
+				state={lowestItemState}
+				onClick={moveWholeState}
+			/>
 		</>
 	)
 }

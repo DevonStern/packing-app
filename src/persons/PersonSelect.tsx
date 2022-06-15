@@ -1,36 +1,52 @@
-import { IonSelectCustomEvent, SelectChangeEventDetail } from "@ionic/core"
 import { IonSelect, IonSelectOption } from "@ionic/react"
+import { useEffect, useState } from "react"
 import { useRecoilState, useRecoilValue } from "recoil"
-import { currentItemState, Item } from "../items/ItemModel"
+import { currentItemState, DEFAULT_ITEM_STATE, Item, ItemPerson, ItemState } from "../items/ItemModel"
 import { Person, personsState } from "./PersonModel"
 
 const PersonSelect: React.FC = () => {
 	const [item, setItem] = useRecoilState(currentItemState)
 	const persons = useRecoilValue(personsState)
 
-	const comparePersons = (o1: Person, o2: Person) => {
-		return o1 && o2 ? o1.id === o2.id : o1 === o2
-	}
+	const [ids, setIds] = useState<string[]>(item.persons.map(ip => ip.person.id))
 
-	const updateItemPersons = (event: IonSelectCustomEvent<SelectChangeEventDetail<Person[]>>) => {
-		const updatedPersons: Person[] = event.detail.value
+	useEffect(() => {
+		const doIdsMatch: boolean = JSON.stringify(ids) === JSON.stringify(item.persons.map(ip => ip.person.id))
+		if (!doIdsMatch) {
+			updateItemPersons()
+		}
+	}, [ids])
+
+	const updateItemPersons = () => {
+		const updatedPersons: Person[] = persons.filter(p => ids.some(id => id === p.id))
+		const updatedItemPersons: ItemPerson[] = updatedPersons.map(person => {
+			const currentItemPerson: ItemPerson | undefined = item.persons.find(ip => ip.person.id === person.id)
+			const state: ItemState = currentItemPerson?.state ?? DEFAULT_ITEM_STATE
+			const updatedItemPerson: ItemPerson = {
+				person,
+				state,
+			}
+			return updatedItemPerson
+		})
 		const updatedItem: Item = {
 			...item,
-			persons: updatedPersons
+			persons: updatedItemPersons
 		}
 		setItem(updatedItem)
 	}
 
 	return (
-		<>
-			<IonSelect multiple compareWith={comparePersons} value={item.persons} onIonChange={updateItemPersons}>
-				{persons.map(person => (
-					<IonSelectOption key={person.id} value={person}>
-						{person.name}
-					</IonSelectOption>
-				))}
-			</IonSelect>
-		</>
+		<IonSelect
+			multiple
+			value={ids}
+			onIonChange={event => setIds(event.detail.value)}
+		>
+			{persons.map(person => (
+				<IonSelectOption key={person.id} value={person.id}>
+					{person.name}
+				</IonSelectOption>
+			))}
+		</IonSelect>
 	)
 }
 

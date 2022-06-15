@@ -7,7 +7,7 @@ import { makeCurrentObjectSelector } from "../utils/persistenceUtils";
 export interface Item {
 	id: string
 	name: string
-	persons: Person[]
+	persons: ItemPerson[]
 	state: ItemState
 }
 
@@ -18,7 +18,12 @@ export enum ItemState {
 	LOADED,
 }
 
-const DEFAULT_ITEM_STATE = ItemState.NEED
+export interface ItemPerson {
+	person: Person
+	state: ItemState
+}
+
+export const DEFAULT_ITEM_STATE = ItemState.NEED
 
 export const makeItem = (name: string): Item => ({
 	id: uuid(),
@@ -30,7 +35,7 @@ export const makeItem = (name: string): Item => ({
 export const itemsRestorer = (savedItems: any): Item[] => {
 	const items: Item[] = savedItems.map((item: Item) => {
 		const state: ItemState = item.state ?? DEFAULT_ITEM_STATE
-		const persons: Person[] = item.persons ?? []
+		const persons: ItemPerson[] = item.persons ?? []
 		const updatedItem: Item = {
 			...item,
 			state,
