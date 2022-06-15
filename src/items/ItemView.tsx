@@ -1,8 +1,9 @@
 import { IonItem, IonLabel, IonList } from "@ionic/react"
 import { useRecoilState, useRecoilValue } from "recoil"
+import useItemInfo from "../hooks/useItemInfo"
 import { personsState } from "../persons/PersonModel"
 import PersonSelect from "../persons/PersonSelect"
-import { getItemPersonWithNextState, getLowestItemState, getNextItemState, isLastItemState } from "../utils/utils"
+import { getItemPersonWithNextState, getNextItemState, isLastItemState } from "../utils/utils"
 import { currentItemState, Item, ItemPerson, ItemState } from "./ItemModel"
 import ItemPersonRow from "./ItemPersonRow"
 import MoveItemStateButton from "./MoveItemStateButton"
@@ -11,9 +12,7 @@ const ItemView: React.FC = () => {
 	const [item, setItem] = useRecoilState(currentItemState)
 	const persons = useRecoilValue(personsState)
 
-	const hasPersons: boolean = item.persons.length > 0
-	const lowestItemState: ItemState = hasPersons ? getLowestItemState(item.persons) : item.state
-	const stateText: string = ItemState[lowestItemState]
+	const { hasPersons, lowestItemState, stateText } = useItemInfo(item)
 
 	const moveWholeState = () => {
 		if (hasPersons) {

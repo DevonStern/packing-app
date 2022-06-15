@@ -2,6 +2,7 @@ import { IonBadge, IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSlidi
 import { trash } from "ionicons/icons"
 import { useHistory } from "react-router"
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil"
+import useItemInfo from "../hooks/useItemInfo"
 import { currentListIdState } from "../lists/ListModel"
 import { currentItemIdState, Item, itemsState, ItemState } from "./ItemModel"
 
@@ -15,6 +16,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item }) => {
 	const listId = useRecoilValue(currentListIdState)
 
 	const history = useHistory()
+	const { lowestItemState, stateText } = useItemInfo(item)
 
 	const goToItem = () => {
 		setCurrentItemId(item.id)
@@ -25,12 +27,19 @@ const ItemRow: React.FC<ItemRowProps> = ({ item }) => {
 		const newItems: Item[] = items.filter(i => i.id !== item.id)
 		setItems(newItems)
 	}
-	
+
 	return (
 		<>
 			<IonItemSliding>
 				<IonItem onClick={goToItem}>
 					{item.name}
+					&nbsp;
+					<IonBadge
+						mode="ios"
+						color={lowestItemState === ItemState.LOADED ? 'success' : 'secondary'}
+					>
+						{stateText}
+					</IonBadge>
 					{item.persons.map(ip => (
 						<IonBadge
 							key={ip.person.id}
