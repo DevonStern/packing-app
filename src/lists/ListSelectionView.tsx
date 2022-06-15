@@ -10,7 +10,7 @@ import ListRow from "./ListRow"
 const ListSelectionView: React.FC = () => {
 	const lists = useRecoilValue(listsState)
 
-	const [isAddListInputOpen, setIsListItemInputOpen] = useState<boolean>(false)
+	const [isAddListInputOpen, setIsAddListInputOpen] = useState<boolean>(false)
 
 	return (
 		<>
@@ -25,11 +25,11 @@ const ListSelectionView: React.FC = () => {
 				})}
 			</IonList>
 			<IonFab horizontal="center" vertical="bottom" style={{ paddingBottom: '60px' }}>
-				<IonFabButton onClick={() => setIsListItemInputOpen(true)}>
+				<IonFabButton onClick={() => setIsAddListInputOpen(true)}>
 					<IonIcon icon={add} size="large" />
 				</IonFabButton>
 			</IonFab>
-			<Modal isOpen={isAddListInputOpen} setIsOpen={setIsListItemInputOpen}>
+			<Modal isOpen={isAddListInputOpen} setIsOpen={setIsAddListInputOpen}>
 				<AddListInput />
 			</Modal>
 		</>
