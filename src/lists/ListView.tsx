@@ -5,6 +5,7 @@ import ItemRow from "../items/ItemRow"
 import { List } from "./ListModel"
 import { add } from 'ionicons/icons';
 import Modal from "../general/Modal"
+import ItemSelect from "../items/ItemSelect"
 
 interface ListViewProps {
 	list: List
@@ -26,7 +27,11 @@ const ListView: React.FC<ListViewProps> = ({ list }) => {
 				</IonFabButton>
 			</IonFab>
 			<Modal isOpen={isAddItemInputOpen} setIsOpen={setIsAddItemInputOpen}>
-				<AddItemInput list={list} />
+				{list.isMaster ?
+					<AddItemInput list={list} />
+					:
+					<ItemSelect list={list} />
+				}
 			</Modal>
 		</>
 	)

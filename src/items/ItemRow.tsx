@@ -18,7 +18,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ list, item }) => {
 	const { lowestItemState, stateText } = useItemInfo(item)
 
 	const goToItem = () => {
-		if (list.id === 'masterId') {
+		if (list.isMaster) {
 			history.push(`/masterList/${list.id}/item/${item.id}`)
 		} else {
 			history.push(`/list/${list.id}/item/${item.id}`)

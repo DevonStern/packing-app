@@ -5,6 +5,7 @@ import { Person } from "../persons/PersonModel";
 
 export interface Item {
 	id: string
+	assignedToListIds?: string[] //For master list items only
 	name: string
 	persons: ItemPerson[]
 	state: ItemState

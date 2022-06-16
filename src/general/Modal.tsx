@@ -1,4 +1,4 @@
-import { IonButton, IonModal } from "@ionic/react"
+import { IonButton, IonContent, IonFooter, IonModal, IonToolbar } from "@ionic/react"
 import { PropsWithChildren } from "react"
 
 interface ModalProps {
@@ -11,8 +11,14 @@ const Modal: React.FC<PropsWithChildren<ModalProps>> = ({ children, isOpen, setI
 		<IonModal
 			isOpen={isOpen}
 		>
-			{children}
-			<IonButton onClick={() => setIsOpen(false)}>Close</IonButton>
+			<IonContent>
+				{children}
+			</IonContent>
+			<IonFooter>
+				<IonToolbar>
+					<IonButton expand="block" onClick={() => setIsOpen(false)}>Close</IonButton>
+				</IonToolbar>
+			</IonFooter>
 		</IonModal>
 	)
 }
