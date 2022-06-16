@@ -17,9 +17,7 @@ const ListSelectionView: React.FC = () => {
 			<IonList>
 				{lists.map(list => {
 					if (list.isMaster) {
-						return <div key={list.id} style={{ border: '3px solid black' }}>
-							<ListRow list={list} />
-						</div>
+						return null
 					}
 					return <ListRow key={list.id} list={list} />
 				})}

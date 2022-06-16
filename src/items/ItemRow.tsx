@@ -1,6 +1,6 @@
 import { IonBadge, IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from "@ionic/react"
 import { trash } from "ionicons/icons"
-import { useHistory } from "react-router"
+import { useHistory } from "react-router-dom"
 import { useRecoilState } from "recoil"
 import useItemInfo from "../hooks/useItemInfo"
 import { List } from "../lists/ListModel"
@@ -18,7 +18,11 @@ const ItemRow: React.FC<ItemRowProps> = ({ list, item }) => {
 	const { lowestItemState, stateText } = useItemInfo(item)
 
 	const goToItem = () => {
-		history.push(`/list/${list.id}/item/${item.id}`)
+		if (list.id === 'masterId') {
+			history.push(`/masterList/${list.id}/item/${item.id}`)
+		} else {
+			history.push(`/list/${list.id}/item/${item.id}`)
+		}
 	}
 
 	const deleteItem = () => {

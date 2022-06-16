@@ -1,6 +1,6 @@
 import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from "@ionic/react"
 import { trash } from "ionicons/icons"
-import { useHistory } from "react-router"
+import { useHistory } from "react-router-dom"
 import { useRecoilState } from "recoil"
 import { List, listsState } from "./ListModel"
 

@@ -30,7 +30,6 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
-import MasterListPage from './lists/MasterListPage';
 import ListSelectionPage from './lists/ListSelectionPage';
 import ListPage from './lists/ListPage';
 import PersonsPage from './persons/PersonsPage';
@@ -43,7 +42,8 @@ const App: React.FC = () => (
 		<IonReactRouter>
 			<IonTabs>
 				<IonRouterOutlet>
-					<Route exact path="/:tab(masterList)/:listId" component={MasterListPage} />
+					<Route exact path="/:tab(masterList)/:listId" component={ListPage} />
+					<Route exact path="/:tab(masterList)/:listId/item/:itemId" component={ItemPage} />
 					<Route exact path="/:tab(list)" component={ListSelectionPage} />
 					<Route exact path="/:tab(list)/:listId" component={ListPage} />
 					<Route exact path="/:tab(list)/:listId/item/:itemId" component={ItemPage} />
