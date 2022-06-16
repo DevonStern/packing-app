@@ -1,14 +1,9 @@
-import { useRecoilValue } from 'recoil';
-import { currentItemIdState } from '../items/ItemModel';
-import ItemPage from '../items/ItemPage';
-import ListPage from '../lists/ListPage';
+import { Route } from 'react-router';
 import './MasterListTab.css';
 
 const MasterListTab: React.FC = () => {
 	return (
-		<>
-
-		</>
+		<Route exact path="/masterList" component={undefined} />
 	)
 }
 

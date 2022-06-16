@@ -41,13 +41,9 @@ const App: React.FC = () => (
 		<IonReactRouter>
 			<IonTabs>
 				<IonRouterOutlet>
-					<Route exact path="/masterList">
-						<MasterListTab />
-					</Route>
+					<MasterListTab />
 					<ListsTab />
-					<Route path="/person">
-						<PersonsTab />
-					</Route>
+					<PersonsTab />
 					<Route exact path="/">
 						<Redirect to="/list" />
 					</Route>
