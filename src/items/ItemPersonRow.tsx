@@ -2,7 +2,7 @@ import { IonItem, IonLabel } from "@ionic/react"
 import { useRecoilState } from "recoil"
 import { List } from "../lists/ListModel"
 import { getItemPersonWithNextState } from "../utils/utils"
-import { currentItemState, Item, ItemPerson, ItemState } from "./ItemModel"
+import { Item, ItemPerson, itemsState, ItemState } from "./ItemModel"
 import MoveItemStateButton from "./MoveItemStateButton"
 
 interface ItemPersonRowProps {
@@ -12,8 +12,17 @@ interface ItemPersonRowProps {
 }
 
 const ItemPersonRow: React.FC<ItemPersonRowProps> = ({ list, item, itemPerson }) => {
-	const [blah, setItem] = useRecoilState(currentItemState)
-
+	const [items, setItems] = useRecoilState(itemsState(list.id))
+	const setItem = (updatedItem: Item) => {
+		const updatedItems: Item[] = items.map(i => {
+			if (i.id === updatedItem.id) {
+				return updatedItem
+			}
+			return i
+		})
+		setItems(updatedItems)
+	}
+	
 	const { person, state } = itemPerson
 
 	const moveItemPersonState = () => {

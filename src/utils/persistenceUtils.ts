@@ -1,4 +1,4 @@
-import { AtomEffect, DefaultValue, RecoilState, RecoilValueReadOnly, selector } from "recoil"
+import { AtomEffect, DefaultValue, RecoilState, RecoilValueReadOnly, selector, selectorFamily } from "recoil"
 import { Storage } from "@capacitor/storage";
 
 export const makePersistenceEffect = <T>(
@@ -22,29 +22,20 @@ interface WithId {
 	id: string,
 }
 
-export const makeCurrentObjectSelector = <T extends WithId>(
+export const makeObjectSelectorFamily = <T extends WithId>(
 	stateKey: string,
 	arrayState: RecoilState<T[]>,
-	currentIdState: RecoilValueReadOnly<string | undefined>,
 ) => {
-	return selector<T>({
+	return selectorFamily<T, string>({
 		key: stateKey,
-		get: ({ get }) => {
-			const id = get(currentIdState)
-			if (!id) {
-				throw new Error("Where's the ID? " + arrayState.key)
-			}
+		get: (id) => ({ get }) => {
 			const currentValue: T | undefined = get(arrayState).find(value => value.id === id)
 			if (!currentValue) {
 				throw new Error("Where'd the thing go?")
 			}
 			return currentValue
 		},
-		set: ({ get, set }, updatedValue) => {
-			const id = get(currentIdState)
-			if (!id) {
-				throw new Error("Where's the ID?")
-			}
+		set: (id) => ({ get, set }, updatedValue) => {
 			if (updatedValue instanceof DefaultValue) {
 				throw new Error("I don't know what the heck is going on.")
 			}

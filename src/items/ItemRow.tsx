@@ -1,10 +1,10 @@
 import { IonBadge, IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from "@ionic/react"
 import { trash } from "ionicons/icons"
 import { useHistory } from "react-router"
-import { useRecoilState, useSetRecoilState } from "recoil"
+import { useRecoilState } from "recoil"
 import useItemInfo from "../hooks/useItemInfo"
 import { List } from "../lists/ListModel"
-import { currentItemIdState, Item, itemsState, ItemState } from "./ItemModel"
+import { Item, itemsState, ItemState } from "./ItemModel"
 
 interface ItemRowProps {
 	list: List
@@ -12,14 +12,12 @@ interface ItemRowProps {
 }
 
 const ItemRow: React.FC<ItemRowProps> = ({ list, item }) => {
-	const [items, setItems] = useRecoilState(itemsState)
-	const setCurrentItemId = useSetRecoilState(currentItemIdState)
+	const [items, setItems] = useRecoilState(itemsState(list.id))
 
 	const history = useHistory()
 	const { lowestItemState, stateText } = useItemInfo(item)
 
 	const goToItem = () => {
-		setCurrentItemId(item.id)
 		history.push(`/list/${list.id}/item/${item.id}`)
 	}
 

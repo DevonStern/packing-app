@@ -4,7 +4,7 @@ import { RouteComponentProps } from "react-router-dom"
 import { useRecoilState, useRecoilValue } from "recoil"
 import useInputFocus from "../hooks/useInputFocus"
 import { List, listsState } from "../lists/ListModel"
-import { currentItemState, Item } from "./ItemModel"
+import { Item, itemsState } from "./ItemModel"
 import ItemView from "./ItemView"
 
 interface ItemPageProps extends RouteComponentProps<{
@@ -81,7 +81,16 @@ interface ItemNameInputProps {
 }
 
 const ItemNameInput: React.FC<ItemNameInputProps> = ({ list, item, setIsEditingName }) => {
-	const [currentItem, setCurrentItem] = useRecoilState(currentItemState)
+	const [items, setItems] = useRecoilState(itemsState(list.id))
+	const setItem = (updatedItem: Item) => {
+		const updatedItems: Item[] = items.map(i => {
+			if (i.id === updatedItem.id) {
+				return updatedItem
+			}
+			return i
+		})
+		setItems(updatedItems)
+	}
 
 	const [name, setName] = useState<string>(item.name)
 
@@ -96,7 +105,7 @@ const ItemNameInput: React.FC<ItemNameInputProps> = ({ list, item, setIsEditingN
 				...item,
 				name: name.trim(),
 			}
-			setCurrentItem(updatedItem)
+			setItem(updatedItem)
 		}
 		setIsEditingName(false)
 	}

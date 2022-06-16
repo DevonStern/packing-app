@@ -1,8 +1,8 @@
-import { atom, DefaultValue, selector } from "recoil"
+import { atom, DefaultValue, selector, selectorFamily } from "recoil"
 import { v4 as uuid } from "uuid";
-import { currentListState, List } from "../lists/ListModel";
+import { listState, List } from "../lists/ListModel";
 import { Person } from "../persons/PersonModel";
-import { makeCurrentObjectSelector } from "../utils/persistenceUtils";
+import { makeObjectSelectorFamily } from "../utils/persistenceUtils";
 
 export interface Item {
 	id: string
@@ -46,26 +46,19 @@ export const itemsRestorer = (savedItems: any): Item[] => {
 	return items
 }
 
-export const itemsState = selector<Item[]>({
+export const itemsState = selectorFamily<Item[], string>({
 	key: 'itemsState',
-	get: ({ get }) => {
-		return get(currentListState).items
+	get: (id) => ({ get }) => {
+		return get(listState(id)).items
 	},
-	set: ({ get, set }, updatedItems) => {
+	set: (id) => ({ get, set }, updatedItems) => {
 		if (updatedItems instanceof DefaultValue) {
 			throw new Error("I don't know what the heck is going on.")
 		}
 		const updatedList: List = {
-			...get(currentListState),
+			...get(listState(id)),
 			items: updatedItems
 		}
-		set(currentListState, updatedList)
+		set(listState(id), updatedList)
 	}
 })
-
-export const currentItemIdState = atom<string | undefined>({
-	key: 'currentItemIdState',
-	default: undefined,
-})
-
-export const currentItemState = makeCurrentObjectSelector('currentItemState', itemsState, currentItemIdState)

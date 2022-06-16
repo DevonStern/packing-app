@@ -1,7 +1,7 @@
 import { atom, DefaultValue, selector } from "recoil"
 import { Item, itemsRestorer } from "../items/ItemModel"
 import { v4 as uuid } from "uuid";
-import { makeCurrentObjectSelector, makePersistenceEffect } from "../utils/persistenceUtils";
+import { makeObjectSelectorFamily, makePersistenceEffect } from "../utils/persistenceUtils";
 
 export interface List {
 	id: string
@@ -48,12 +48,7 @@ export const listsState = atom<List[]>({
 	],
 })
 
-export const currentListIdState = atom<string | undefined>({
-	key: 'currentListIdState',
-	default: undefined,
-})
-
-export const currentListState = makeCurrentObjectSelector('currentListState', listsState, currentListIdState)
+export const listState = makeObjectSelectorFamily('currentListState', listsState)
 
 export const masterListState = selector<List>({
 	key: 'masterListState',

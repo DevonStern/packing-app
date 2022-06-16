@@ -5,7 +5,7 @@ import { List } from "../lists/ListModel"
 import { personsState } from "../persons/PersonModel"
 import PersonSelect from "../persons/PersonSelect"
 import { getItemPersonWithNextState, getNextItemState, isLastItemState } from "../utils/utils"
-import { currentItemState, Item, ItemPerson, ItemState } from "./ItemModel"
+import { Item, ItemPerson, itemsState, ItemState } from "./ItemModel"
 import ItemPersonRow from "./ItemPersonRow"
 import MoveItemStateButton from "./MoveItemStateButton"
 
@@ -15,7 +15,16 @@ interface ItemViewProps {
 }
 
 const ItemView: React.FC<ItemViewProps> = ({ list, item }) => {
-	const [blah, setItem] = useRecoilState(currentItemState)
+	const [items, setItems] = useRecoilState(itemsState(list.id))
+	const setItem = (updatedItem: Item) => {
+		const updatedItems: Item[] = items.map(i => {
+			if (i.id === updatedItem.id) {
+				return updatedItem
+			}
+			return i
+		})
+		setItems(updatedItems)
+	}
 	const persons = useRecoilValue(personsState)
 
 	const { hasPersons, lowestItemState, stateText } = useItemInfo(item)

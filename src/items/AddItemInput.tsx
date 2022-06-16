@@ -8,12 +8,12 @@ interface AddItemInputProps {
 }
 
 const AddItemInput: React.FC<AddItemInputProps> = ({ list }) => {
-	const [blah, setItems] = useRecoilState(itemsState)
+	const [items, setItems] = useRecoilState(itemsState(list.id))
 
 	const addItem = (name: string) => {
 		const newItem: Item = makeItem(name)
 		const newItems: Item[] = [
-			...list.items,
+			...items,
 			newItem
 		]
 		setItems(newItems)
