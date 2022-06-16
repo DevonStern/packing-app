@@ -4,12 +4,12 @@ import { ItemState } from "./ItemModel"
 
 
 interface MoveItemStateButtonProps {
+	expand?: "block" | "full"
 	state: ItemState
 	onClick: () => void
-	expand?: "block" | "full"
 }
 
-const MoveItemStateButton: React.FC<MoveItemStateButtonProps> = ({ state, onClick, expand }) => {
+const MoveItemStateButton: React.FC<MoveItemStateButtonProps> = ({ expand, state, onClick }) => {
 	const isLastState: boolean = isLastItemState(state)
 	const nextState: ItemState = getNextItemState(state)
 

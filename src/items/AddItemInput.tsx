@@ -1,14 +1,19 @@
 import { useRecoilState } from "recoil"
 import AddObjectInput from "../general/AddObjectInput"
+import { List } from "../lists/ListModel"
 import { Item, itemsState, makeItem } from "./ItemModel"
 
-const AddItemInput: React.FC = () => {
-	const [items, setItems] = useRecoilState(itemsState)
+interface AddItemInputProps {
+	list: List
+}
+
+const AddItemInput: React.FC<AddItemInputProps> = ({ list }) => {
+	const [blah, setItems] = useRecoilState(itemsState)
 
 	const addItem = (name: string) => {
 		const newItem: Item = makeItem(name)
 		const newItems: Item[] = [
-			...items,
+			...list.items,
 			newItem
 		]
 		setItems(newItems)

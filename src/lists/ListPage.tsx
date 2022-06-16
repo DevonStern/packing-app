@@ -1,16 +1,29 @@
 import { IonBackButton, IonButtons, IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
+import { RouteComponentProps } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
-import { currentListState } from './ListModel';
+import { List, listsState } from './ListModel';
 import ListView from './ListView';
 
-const ListPage: React.FC = () => {
+interface ListPageProps extends RouteComponentProps<{
+	listId: string
+}> {
+}
+
+const ListPage: React.FC<ListPageProps> = ({ match: { params: { listId } } }) => {
+	const lists = useRecoilValue(listsState)
+
+	const list: List | undefined = lists.find(l => l.id === listId)
+	if (!list) {
+		console.error(`Invalid listId param in route: ${listId}`)
+		return <>Error</>
+	}
 
 	return (
 		<IonPage>
-			<Header isMain={true} />
+			<Header list={list} isMain={true} />
 			<IonContent fullscreen>
-				<Header isMain={false} />
-				<ListView />
+				<Header list={list} isMain={false} />
+				<ListView list={list} />
 			</IonContent>
 		</IonPage>
 	)
@@ -21,11 +34,11 @@ export default ListPage
 
 
 interface HeaderProps {
+	list: List
 	isMain: boolean
 }
 
-const Header: React.FC<HeaderProps> = ({ isMain }) => {
-	const list = useRecoilValue(currentListState)
+const Header: React.FC<HeaderProps> = ({ list, isMain }) => {
 
 	const title: string = `${list.name} Packing List`
 

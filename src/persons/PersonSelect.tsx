@@ -2,10 +2,16 @@ import { IonSelect, IonSelectOption } from "@ionic/react"
 import { useEffect, useState } from "react"
 import { useRecoilState, useRecoilValue } from "recoil"
 import { currentItemState, DEFAULT_ITEM_STATE, Item, ItemPerson, ItemState } from "../items/ItemModel"
+import { List } from "../lists/ListModel"
 import { Person, personsState } from "./PersonModel"
 
-const PersonSelect: React.FC = () => {
-	const [item, setItem] = useRecoilState(currentItemState)
+interface PersonSelectProps {
+	list: List
+	item: Item
+}
+
+const PersonSelect: React.FC<PersonSelectProps> = ({ list, item }) => {
+	const [blah, setItem] = useRecoilState(currentItemState)
 	const persons = useRecoilValue(personsState)
 
 	const [ids, setIds] = useState<string[]>(item.persons.map(ip => ip.person.id))

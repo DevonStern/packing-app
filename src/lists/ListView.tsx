@@ -1,22 +1,23 @@
 import { IonFab, IonFabButton, IonIcon, IonList } from "@ionic/react"
 import { useState } from "react"
-import { useRecoilValue } from "recoil"
 import AddItemInput from "../items/AddItemInput"
 import ItemRow from "../items/ItemRow"
-import { currentListState } from "./ListModel"
+import { List } from "./ListModel"
 import { add } from 'ionicons/icons';
 import Modal from "../general/Modal"
 
-const ListView: React.FC = () => {
-	const currentList = useRecoilValue(currentListState)
-	
+interface ListViewProps {
+	list: List
+}
+
+const ListView: React.FC<ListViewProps> = ({ list }) => {
 	const [isAddItemInputOpen, setIsAddItemInputOpen] = useState<boolean>(false)
 
 	return (
 		<>
 			<IonList>
-				{currentList.items.map(item => {
-					return <ItemRow key={item.id} item={item} />
+				{list.items.map(item => {
+					return <ItemRow key={item.id} list={list} item={item} />
 				})}
 			</IonList>
 			<IonFab horizontal="center" vertical="bottom" style={{ paddingBottom: '60px' }}>
@@ -25,7 +26,7 @@ const ListView: React.FC = () => {
 				</IonFabButton>
 			</IonFab>
 			<Modal isOpen={isAddItemInputOpen} setIsOpen={setIsAddItemInputOpen}>
-				<AddItemInput />
+				<AddItemInput list={list} />
 			</Modal>
 		</>
 	)

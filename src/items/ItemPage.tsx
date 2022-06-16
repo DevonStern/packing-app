@@ -1,17 +1,34 @@
 import { IonBackButton, IonButtons, IonContent, IonHeader, IonInput, IonPage, IonTitle, IonToolbar } from "@ionic/react"
 import { useRef, useState } from "react"
+import { RouteComponentProps } from "react-router-dom"
 import { useRecoilState, useRecoilValue } from "recoil"
 import useInputFocus from "../hooks/useInputFocus"
+import { List, listsState } from "../lists/ListModel"
 import { currentItemState, Item } from "./ItemModel"
 import ItemView from "./ItemView"
 
-const ItemPage: React.FC = () => {
+interface ItemPageProps extends RouteComponentProps<{
+	listId: string
+	itemId: string
+}> {
+}
+
+const ItemPage: React.FC<ItemPageProps> = ({ match: { params: { listId, itemId } } }) => {
+	const lists = useRecoilValue(listsState)
+	
+	const list: List | undefined = lists.find(l => l.id === listId)
+	const item: Item | undefined = list?.items.find(i => i.id === itemId)
+	if (!list || !item) {
+		console.error(`Invalid listId or itemId param in route: listId = ${listId}, itemId = ${itemId}`)
+		return <>Error</>
+	}
+
 	return (
 		<IonPage>
-			<Header isMain={true} />
+			<Header list={list} item={item} isMain={true} />
 			<IonContent fullscreen>
-				<Header isMain={false} />
-				<ItemView />
+				<Header list={list} item={item} isMain={false} />
+				<ItemView list={list} item={item} />
 			</IonContent>
 		</IonPage>
 	)
@@ -22,12 +39,12 @@ export default ItemPage
 
 
 interface HeaderProps {
+	list: List
+	item: Item
 	isMain: boolean
 }
 
-const Header: React.FC<HeaderProps> = ({ isMain }) => {
-	const currentItem = useRecoilValue(currentItemState)
-
+const Header: React.FC<HeaderProps> = ({ list, item, isMain }) => {
 	const [isEditingName, setIsEditingName] = useState<boolean>(false)
 
 	return (
@@ -37,11 +54,18 @@ const Header: React.FC<HeaderProps> = ({ isMain }) => {
 					<IonBackButton />
 				</IonButtons>
 				{!isEditingName ?
-					<IonTitle size={isMain ? undefined : 'large'} onClick={() => setIsEditingName(true)}>
-						{currentItem.name}
+					<IonTitle
+						size={isMain ? undefined : 'large'}
+						onClick={() => setIsEditingName(true)}
+					>
+						{item.name}
 					</IonTitle>
 					:
-					<ItemNameInput setIsEditingName={setIsEditingName} />
+					<ItemNameInput
+						list={list}
+						item={item}
+						setIsEditingName={setIsEditingName}
+					/>
 				}
 			</IonToolbar>
 		</IonHeader>
@@ -51,23 +75,25 @@ const Header: React.FC<HeaderProps> = ({ isMain }) => {
 
 
 interface ItemNameInputProps {
+	list: List
+	item: Item
 	setIsEditingName: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const ItemNameInput: React.FC<ItemNameInputProps> = ({ setIsEditingName }) => {
+const ItemNameInput: React.FC<ItemNameInputProps> = ({ list, item, setIsEditingName }) => {
 	const [currentItem, setCurrentItem] = useRecoilState(currentItemState)
 
-	const [name, setName] = useState<string>(currentItem.name)
+	const [name, setName] = useState<string>(item.name)
 
 	const inputRef = useRef<HTMLIonInputElement | null>(null)
 	useInputFocus(inputRef)
 
 	const submitName = () => {
 		if (!name.trim()) {
-			setName(currentItem.name)
+			setName(item.name)
 		} else {
 			const updatedItem: Item = {
-				...currentItem,
+				...item,
 				name: name.trim(),
 			}
 			setCurrentItem(updatedItem)
