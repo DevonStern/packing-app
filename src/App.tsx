@@ -10,10 +10,7 @@ import {
 	setupIonicReact
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { ellipse, person, square, triangle } from 'ionicons/icons';
-import MasterListTab from './tabs/MasterListTab';
-import ListsTab from './tabs/ListsTab';
-import PersonsTab from './tabs/PersonsTab';
+import { ellipse, person, triangle } from 'ionicons/icons';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -46,7 +43,7 @@ const App: React.FC = () => (
 		<IonReactRouter>
 			<IonTabs>
 				<IonRouterOutlet>
-					<Route exact path="/:tab(masterList)" component={MasterListPage} />
+					<Route exact path="/:tab(masterList)/:listId" component={MasterListPage} />
 					<Route exact path="/:tab(list)" component={ListSelectionPage} />
 					<Route exact path="/:tab(list)/:listId" component={ListPage} />
 					<Route exact path="/:tab(list)/:listId/item/:itemId" component={ItemPage} />
@@ -54,7 +51,7 @@ const App: React.FC = () => (
 					<Route exact path="/" render={() => <Redirect to="/list" />} />
 				</IonRouterOutlet>
 				<IonTabBar slot="bottom">
-					<IonTabButton tab="masterList" href="/masterList">
+					<IonTabButton tab="masterList" href="/masterList/masterId">
 						<IonIcon icon={triangle} />
 						<IonLabel>Master List</IonLabel>
 					</IonTabButton>
