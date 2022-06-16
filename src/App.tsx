@@ -33,6 +33,11 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
+import MasterListPage from './lists/MasterListPage';
+import ListSelectionPage from './lists/ListSelectionPage';
+import ListPage from './lists/ListPage';
+import PersonsPage from './persons/PersonsPage';
+import ItemPage from './items/ItemPage';
 
 setupIonicReact();
 
@@ -41,12 +46,12 @@ const App: React.FC = () => (
 		<IonReactRouter>
 			<IonTabs>
 				<IonRouterOutlet>
-					<MasterListTab />
-					<ListsTab />
-					<PersonsTab />
-					<Route exact path="/">
-						<Redirect to="/list" />
-					</Route>
+					<Route exact path="/:tab(masterList)" component={MasterListPage} />
+					<Route exact path="/:tab(list)" component={ListSelectionPage} />
+					<Route exact path="/:tab(list)/:listId" component={ListPage} />
+					<Route exact path="/:tab(list)/:listId/item/:itemId" component={ItemPage} />
+					<Route exact path="/:tab(person)" component={PersonsPage} />
+					<Route exact path="/" render={() => <Redirect to="/list" />} />
 				</IonRouterOutlet>
 				<IonTabBar slot="bottom">
 					<IonTabButton tab="masterList" href="/masterList">
