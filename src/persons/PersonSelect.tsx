@@ -1,7 +1,7 @@
 import { IonSelect, IonSelectOption } from "@ionic/react"
 import { useEffect, useState } from "react"
-import { useRecoilState, useRecoilValue } from "recoil"
-import { DEFAULT_ITEM_STATE, Item, ItemPerson, itemsState, ItemState } from "../items/ItemModel"
+import { useRecoilValue, useSetRecoilState } from "recoil"
+import { DEFAULT_ITEM_STATE, Item, ItemPerson, itemState, ItemState } from "../items/ItemModel"
 import { List } from "../lists/ListModel"
 import { Person, personsState } from "./PersonModel"
 
@@ -11,16 +11,11 @@ interface PersonSelectProps {
 }
 
 const PersonSelect: React.FC<PersonSelectProps> = ({ list, item }) => {
-	const [items, setItems] = useRecoilState(itemsState(list.id))
-	const setItem = (updatedItem: Item) => {
-		const updatedItems: Item[] = items.map(i => {
-			if (i.id === updatedItem.id) {
-				return updatedItem
-			}
-			return i
-		})
-		setItems(updatedItems)
-	}
+	const setItem = useSetRecoilState(itemState({
+		listId: list.id,
+		itemId: item.id,
+		toJSON: () => JSON.stringify({ listId: list.id, itemId: item.id }),
+	}))
 	const persons = useRecoilValue(personsState)
 
 	const [ids, setIds] = useState<string[]>(item.persons.map(ip => ip.person.id))

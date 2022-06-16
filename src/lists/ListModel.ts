@@ -1,7 +1,7 @@
-import { atom, DefaultValue, selector } from "recoil"
+import { atom, DefaultValue, selector, selectorFamily } from "recoil"
 import { Item, itemsRestorer } from "../items/ItemModel"
 import { v4 as uuid } from "uuid";
-import { makeObjectSelectorFamily, makePersistenceEffect } from "../utils/persistenceUtils";
+import { makePersistenceEffect } from "../utils/persistenceUtils";
 
 export interface List {
 	id: string
@@ -48,7 +48,32 @@ export const listsState = atom<List[]>({
 	],
 })
 
-export const listState = makeObjectSelectorFamily('currentListState', listsState)
+export const listState = selectorFamily<List, string>({
+	key: 'listState',
+	get: (id) => ({ get }) => {
+		const currentValue: List | undefined = get(listsState).find(value => value.id === id)
+		if (!currentValue) {
+			throw new Error("Where'd the thing go?")
+		}
+		return currentValue
+	},
+	set: (id) => ({ get, set }, updatedValue) => {
+		if (updatedValue instanceof DefaultValue) {
+			throw new Error("I don't know what the heck is going on.")
+		}
+		const currentValue: List | undefined = get(listsState).find(value => value.id === id)
+		if (!currentValue) {
+			throw new Error("Where'd the thing go?")
+		}
+		const updatedValues: List[] = get(listsState).map(value => {
+			if (currentValue.id === value.id) {
+				return updatedValue
+			}
+			return value
+		})
+		set(listsState, updatedValues)
+	},
+})
 
 export const masterListState = selector<List>({
 	key: 'masterListState',

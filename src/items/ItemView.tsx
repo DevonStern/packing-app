@@ -1,11 +1,11 @@
 import { IonItem, IonLabel, IonList } from "@ionic/react"
-import { useRecoilState, useRecoilValue } from "recoil"
+import { useRecoilValue, useSetRecoilState } from "recoil"
 import useItemInfo from "../hooks/useItemInfo"
 import { List } from "../lists/ListModel"
 import { personsState } from "../persons/PersonModel"
 import PersonSelect from "../persons/PersonSelect"
 import { getItemPersonWithNextState, getNextItemState, isLastItemState } from "../utils/utils"
-import { Item, ItemPerson, itemsState, ItemState } from "./ItemModel"
+import { Item, ItemPerson, itemState, ItemState } from "./ItemModel"
 import ItemPersonRow from "./ItemPersonRow"
 import MoveItemStateButton from "./MoveItemStateButton"
 
@@ -15,16 +15,11 @@ interface ItemViewProps {
 }
 
 const ItemView: React.FC<ItemViewProps> = ({ list, item }) => {
-	const [items, setItems] = useRecoilState(itemsState(list.id))
-	const setItem = (updatedItem: Item) => {
-		const updatedItems: Item[] = items.map(i => {
-			if (i.id === updatedItem.id) {
-				return updatedItem
-			}
-			return i
-		})
-		setItems(updatedItems)
-	}
+	const setItem = useSetRecoilState(itemState({
+		listId: list.id,
+		itemId: item.id,
+		toJSON: () => JSON.stringify({ listId: list.id, itemId: item.id }),
+	}))
 	const persons = useRecoilValue(personsState)
 
 	const { hasPersons, lowestItemState, stateText } = useItemInfo(item)
