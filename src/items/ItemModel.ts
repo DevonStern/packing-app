@@ -1,7 +1,7 @@
 import { DefaultValue, selectorFamily } from "recoil"
 import { v4 as uuid } from "uuid";
-import { listState, List } from "../lists/ListModel";
-import { Person } from "../persons/PersonModel";
+import { listState, List } from "../lists/listModel";
+import { Person } from "../persons/personModel";
 
 export interface Item {
 	id: string

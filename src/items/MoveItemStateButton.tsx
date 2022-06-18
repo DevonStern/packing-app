@@ -1,6 +1,6 @@
 import { IonButton } from "@ionic/react"
 import { getNextItemState, isLastItemState } from "../utils/itemStateUtils"
-import { ItemState } from "./ItemModel"
+import { ItemState } from "./itemModel"
 
 
 interface MoveItemStateButtonProps {

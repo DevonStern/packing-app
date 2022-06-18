@@ -1,6 +1,6 @@
 import { useRecoilState } from "recoil"
 import AddObjectInput from "../general/AddObjectInput"
-import { List, listsState, makeList } from "./ListModel"
+import { List, listsState, makeList } from "./listModel"
 
 const AddListInput: React.FC = () => {
 	const [lists, setLists] = useRecoilState(listsState)

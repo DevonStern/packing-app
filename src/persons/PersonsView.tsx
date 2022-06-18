@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRecoilState } from "recoil"
 import Modal from "../general/Modal"
 import AddPersonInput from "./AddPersonInput"
-import { personsState } from "./PersonModel"
+import { personsState } from "./personModel"
 
 const PersonsView: React.FC = () => {
 	const [persons, setPersons] = useRecoilState(personsState)

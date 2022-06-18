@@ -2,7 +2,7 @@ import { IonFab, IonFabButton, IonIcon, IonList } from "@ionic/react"
 import { useState } from "react"
 import AddItemInput from "../items/AddItemInput"
 import ItemRow from "../items/ItemRow"
-import { List } from "./ListModel"
+import { List } from "./listModel"
 import { add } from 'ionicons/icons';
 import Modal from "../general/Modal"
 import ItemSelect from "../items/ItemSelect"

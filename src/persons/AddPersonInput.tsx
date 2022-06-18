@@ -1,6 +1,6 @@
 import { useRecoilState } from "recoil"
 import AddObjectInput from "../general/AddObjectInput"
-import { makePerson, Person, personsState } from "./PersonModel"
+import { makePerson, Person, personsState } from "./personModel"
 
 const AddPersonInput: React.FC = () => {
 	const [persons, setPersons] = useRecoilState(personsState)

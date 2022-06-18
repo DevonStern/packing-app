@@ -2,7 +2,7 @@ import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from 
 import { trash } from "ionicons/icons"
 import { useHistory } from "react-router-dom"
 import { useRecoilState } from "recoil"
-import { List, listsState } from "./ListModel"
+import { List, listsState } from "./listModel"
 
 interface ListRowProps {
 	list: List

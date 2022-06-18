@@ -2,8 +2,8 @@ import { IonBadge, IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSlidi
 import { trash } from "ionicons/icons"
 import { useHistory } from "react-router-dom"
 import useItemInfo from "./useItemInfo"
-import { List } from "../lists/ListModel"
-import { Item, ItemState } from "./ItemModel"
+import { List } from "../lists/listModel"
+import { Item, ItemState } from "./itemModel"
 import useItem from "./useItem"
 
 interface ItemRowProps {

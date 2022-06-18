@@ -1,4 +1,4 @@
-import { ItemPerson, ItemState } from "../items/ItemModel";
+import { ItemPerson, ItemState } from "../items/itemModel";
 
 export const getNextItemState = (currentValue: ItemState): ItemState => {
 	//All keys and values are included in the array for reverse lookup, so divide by 2

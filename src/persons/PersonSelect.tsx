@@ -1,9 +1,9 @@
 import { IonSelect, IonSelectOption } from "@ionic/react"
 import { useEffect, useState } from "react"
 import { useRecoilValue, useSetRecoilState } from "recoil"
-import { DEFAULT_ITEM_STATE, Item, ItemPerson, itemState, ItemState } from "../items/ItemModel"
-import { List } from "../lists/ListModel"
-import { Person, personsState } from "./PersonModel"
+import { DEFAULT_ITEM_STATE, Item, ItemPerson, itemState, ItemState } from "../items/itemModel"
+import { List } from "../lists/listModel"
+import { Person, personsState } from "./personModel"
 
 interface PersonSelectProps {
 	list: List

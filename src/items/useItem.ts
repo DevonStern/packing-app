@@ -1,6 +1,6 @@
 import { useRecoilState } from "recoil"
-import { List, masterListState } from "../lists/ListModel"
-import { Item, itemsState } from "./ItemModel"
+import { List, masterListState } from "../lists/listModel"
+import { Item, itemsState } from "./itemModel"
 
 const useItem = (list: List, item: Item) => {
 	const [items, setItems] = useRecoilState(itemsState(list.id))

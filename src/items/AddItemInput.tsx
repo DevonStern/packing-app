@@ -1,7 +1,7 @@
 import { useRecoilState } from "recoil"
 import AddObjectInput from "../general/AddObjectInput"
-import { List } from "../lists/ListModel"
-import { Item, itemsState, makeItem } from "./ItemModel"
+import { List } from "../lists/listModel"
+import { Item, itemsState, makeItem } from "./itemModel"
 
 interface AddItemInputProps {
 	list: List

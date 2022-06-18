@@ -1,4 +1,4 @@
-import { Item, ItemState } from "./ItemModel";
+import { Item, ItemState } from "./itemModel";
 import { getLowestItemState } from "../utils/itemStateUtils";
 
 const ItemInfo = (item: Item) => {

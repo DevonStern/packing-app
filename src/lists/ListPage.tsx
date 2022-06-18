@@ -1,7 +1,7 @@
 import { IonBackButton, IonButtons, IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 import { RouteComponentProps } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
-import { List, listsState } from './ListModel';
+import { List, listsState } from './listModel';
 import ListView from './ListView';
 
 interface ListPageProps extends RouteComponentProps<{

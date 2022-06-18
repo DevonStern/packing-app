@@ -3,8 +3,8 @@ import { useRef, useState } from "react"
 import { RouteComponentProps } from "react-router-dom"
 import { useRecoilValue, useSetRecoilState } from "recoil"
 import useInputFocus from "../general/useInputFocus"
-import { List, listsState } from "../lists/ListModel"
-import { Item, itemState } from "./ItemModel"
+import { List, listsState } from "../lists/listModel"
+import { Item, itemState } from "./itemModel"
 import ItemView from "./ItemView"
 
 interface ItemPageProps extends RouteComponentProps<{

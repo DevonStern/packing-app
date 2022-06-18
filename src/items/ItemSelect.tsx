@@ -1,8 +1,8 @@
 import { IonButton, IonList } from "@ionic/react"
 import { useState } from "react"
 import { useRecoilState } from "recoil"
-import { List, masterListState } from "../lists/ListModel"
-import { Item, itemsState } from "./ItemModel"
+import { List, masterListState } from "../lists/listModel"
+import { Item, itemsState } from "./itemModel"
 import ItemSelectRow from "./ItemSelectRow"
 
 interface ItemSelectProps {
