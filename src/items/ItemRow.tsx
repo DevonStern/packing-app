@@ -1,10 +1,10 @@
 import { IonBadge, IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from "@ionic/react"
 import { trash } from "ionicons/icons"
 import { useHistory } from "react-router-dom"
-import { useRecoilState } from "recoil"
 import useItemInfo from "./useItemInfo"
 import { List } from "../lists/ListModel"
-import { Item, itemsState, ItemState } from "./ItemModel"
+import { Item, ItemState } from "./ItemModel"
+import useItem from "./useItem"
 
 interface ItemRowProps {
 	list: List
@@ -12,10 +12,9 @@ interface ItemRowProps {
 }
 
 const ItemRow: React.FC<ItemRowProps> = ({ list, item }) => {
-	const [items, setItems] = useRecoilState(itemsState(list.id))
-
 	const history = useHistory()
 	const { lowestItemState, stateText } = useItemInfo(item)
+	const { deleteItem } = useItem(list, item)
 
 	const goToItem = () => {
 		if (list.isMaster) {
@@ -23,11 +22,6 @@ const ItemRow: React.FC<ItemRowProps> = ({ list, item }) => {
 		} else {
 			history.push(`/list/${list.id}/item/${item.id}`)
 		}
-	}
-
-	const deleteItem = () => {
-		const newItems: Item[] = items.filter(i => i.id !== item.id)
-		setItems(newItems)
 	}
 
 	return (
