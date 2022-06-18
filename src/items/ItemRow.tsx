@@ -2,7 +2,7 @@ import { IonBadge, IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSlidi
 import { trash } from "ionicons/icons"
 import { useHistory } from "react-router-dom"
 import { useRecoilState } from "recoil"
-import useItemInfo from "../hooks/useItemInfo"
+import useItemInfo from "./useItemInfo"
 import { List } from "../lists/ListModel"
 import { Item, itemsState, ItemState } from "./ItemModel"
 

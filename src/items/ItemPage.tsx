@@ -2,7 +2,7 @@ import { IonBackButton, IonButtons, IonContent, IonHeader, IonInput, IonPage, Io
 import { useRef, useState } from "react"
 import { RouteComponentProps } from "react-router-dom"
 import { useRecoilValue, useSetRecoilState } from "recoil"
-import useInputFocus from "../hooks/useInputFocus"
+import useInputFocus from "../general/useInputFocus"
 import { List, listsState } from "../lists/ListModel"
 import { Item, itemState } from "./ItemModel"
 import ItemView from "./ItemView"

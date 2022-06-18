@@ -1,5 +1,5 @@
-import { Item, ItemState } from "../items/ItemModel";
-import { getLowestItemState } from "../utils/utils";
+import { Item, ItemState } from "./ItemModel";
+import { getLowestItemState } from "../utils/itemStateUtils";
 
 const ItemInfo = (item: Item) => {
 	const hasPersons: boolean = item.persons.length > 0

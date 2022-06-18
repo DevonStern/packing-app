@@ -1,5 +1,5 @@
 import { IonButton } from "@ionic/react"
-import { getNextItemState, isLastItemState } from "../utils/utils"
+import { getNextItemState, isLastItemState } from "../utils/itemStateUtils"
 import { ItemState } from "./ItemModel"
 
 

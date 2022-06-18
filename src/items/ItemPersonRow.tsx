@@ -1,7 +1,7 @@
 import { IonItem, IonLabel } from "@ionic/react"
 import { useSetRecoilState } from "recoil"
 import { List } from "../lists/ListModel"
-import { getItemPersonWithNextState } from "../utils/utils"
+import { getItemPersonWithNextState } from "../utils/itemStateUtils"
 import { Item, ItemPerson, itemState, ItemState } from "./ItemModel"
 import MoveItemStateButton from "./MoveItemStateButton"
 
