@@ -1,7 +1,7 @@
-import { IonFab, IonFabButton, IonIcon, IonList } from "@ionic/react"
-import { add } from "ionicons/icons"
+import { IonList } from "@ionic/react"
 import { useState } from "react"
 import { useRecoilValue } from "recoil"
+import Fab from "../general/Fab"
 import Modal from "../general/Modal"
 import AddListInput from "./AddListInput"
 import { listsState } from "./listModel"
@@ -22,11 +22,7 @@ const ListSelectionView: React.FC = () => {
 					return <ListRow key={list.id} list={list} />
 				})}
 			</IonList>
-			<IonFab horizontal="center" vertical="bottom" style={{ paddingBottom: '60px' }}>
-				<IonFabButton onClick={() => setIsAddListInputOpen(true)}>
-					<IonIcon icon={add} size="large" />
-				</IonFabButton>
-			</IonFab>
+			<Fab onClick={() => setIsAddListInputOpen(true)} />
 			<Modal isOpen={isAddListInputOpen} setIsOpen={setIsAddListInputOpen}>
 				<AddListInput />
 			</Modal>

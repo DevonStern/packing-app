@@ -1,11 +1,11 @@
-import { IonFab, IonFabButton, IonIcon, IonList } from "@ionic/react"
+import { IonList } from "@ionic/react"
 import { useState } from "react"
 import AddItemInput from "../items/AddItemInput"
 import ItemRow from "../items/ItemRow"
 import { List } from "./listModel"
-import { add } from 'ionicons/icons';
 import Modal from "../general/Modal"
 import ItemSelect from "../items/ItemSelect"
+import Fab from "../general/Fab"
 
 interface ListViewProps {
 	list: List
@@ -21,11 +21,7 @@ const ListView: React.FC<ListViewProps> = ({ list }) => {
 					return <ItemRow key={item.id} list={list} item={item} />
 				})}
 			</IonList>
-			<IonFab horizontal="center" vertical="bottom" style={{ paddingBottom: '60px' }}>
-				<IonFabButton onClick={() => setIsAddItemInputOpen(true)}>
-					<IonIcon icon={add} size="large" />
-				</IonFabButton>
-			</IonFab>
+			<Fab onClick={() => setIsAddItemInputOpen(true)} />
 			<Modal isOpen={isAddItemInputOpen} setIsOpen={setIsAddItemInputOpen}>
 				{list.isMaster ?
 					<AddItemInput list={list} />

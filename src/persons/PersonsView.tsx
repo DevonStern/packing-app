@@ -1,7 +1,7 @@
-import { IonFab, IonFabButton, IonIcon, IonItem, IonList } from "@ionic/react"
-import { add } from "ionicons/icons"
+import { IonItem, IonList } from "@ionic/react"
 import { useState } from "react"
 import { useRecoilState } from "recoil"
+import Fab from "../general/Fab"
 import Modal from "../general/Modal"
 import AddPersonInput from "./AddPersonInput"
 import { personsState } from "./personModel"
@@ -18,11 +18,7 @@ const PersonsView: React.FC = () => {
 					return <IonItem key={person.id}>{person.name}</IonItem>
 				})}
 			</IonList>
-			<IonFab horizontal="center" vertical="bottom" style={{ paddingBottom: '60px' }}>
-				<IonFabButton onClick={() => setIsAddInputOpen(true)}>
-					<IonIcon icon={add} size="large" />
-				</IonFabButton>
-			</IonFab>
+			<Fab onClick={() => setIsAddInputOpen(true)} />
 			<Modal isOpen={isAddInputOpen} setIsOpen={setIsAddInputOpen}>
 				<AddPersonInput />
 			</Modal>
