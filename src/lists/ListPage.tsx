@@ -1,8 +1,14 @@
-import { IonBackButton, IonButtons, IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
+import { IonBackButton, IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar } from '@ionic/react';
+import { checkbox, checkboxOutline } from 'ionicons/icons';
 import { RouteComponentProps } from 'react-router-dom';
-import { useRecoilValue } from 'recoil';
+import { atom, useRecoilState, useRecoilValue } from 'recoil';
 import { List, listsState } from './listModel';
 import ListView from './ListView';
+
+export const multiSelectState = atom<boolean>({
+	key: 'multiSelectState',
+	default: false,
+})
 
 interface ListPageProps extends RouteComponentProps<{
 	listId: string
@@ -39,6 +45,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ list, isMain }) => {
+	const [isMultiSelectMode, setIsMultiSelectMode] = useRecoilState(multiSelectState)
 
 	const title: string = `${list.name} Packing List`
 
@@ -49,6 +56,17 @@ const Header: React.FC<HeaderProps> = ({ list, isMain }) => {
 					<IonBackButton />
 				</IonButtons>
 				<IonTitle size={isMain ? undefined : 'large'}>{title}</IonTitle>
+				<IonButtons slot="end">
+					{isMultiSelectMode ?
+						<IonButton onClick={() => setIsMultiSelectMode(false)}>
+							<IonIcon icon={checkbox} size="large" />
+						</IonButton>
+					:
+						<IonButton onClick={() => setIsMultiSelectMode(true)}>
+							<IonIcon icon={checkboxOutline} size="large" />
+						</IonButton>
+					}
+				</IonButtons>
 			</IonToolbar>
 		</IonHeader>
 	)
