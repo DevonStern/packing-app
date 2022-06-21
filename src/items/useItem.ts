@@ -1,19 +1,39 @@
-import { useRecoilState } from "recoil"
-import { List, masterListState } from "../lists/listModel"
-import { Item, itemsState } from "./itemModel"
+import { useRecoilState, useSetRecoilState } from "recoil"
+import { List, listsState, masterListState } from "../lists/listModel"
+import { Item } from "./itemModel"
 
 const useItem = (list: List, item: Item) => {
-	const [items, setItems] = useRecoilState(itemsState(list.id))
+	const setLists = useSetRecoilState(listsState)
 	const [masterList, setMasterList] = useRecoilState(masterListState)
 	
 	const deleteItem = () => {
+		if (list.isMaster) {
+			deleteItemFromLinkedLists()
+		} else {
+			deleteLinkFromMasterListItem()
+		}
 		deleteItemFromList()
-		deleteLinkFromMasterListItem()
 	}
 
-	const deleteItemFromList = () => {
-		const newItems: Item[] = items.filter(i => i.id !== item.id)
-		setItems(newItems)
+	const deleteItemFromLinkedLists = () => {
+		const listIds: string[] = item.assignedToListIds ?? []
+		setLists((previousLists) => {
+			return previousLists.map(l => {
+				if (listIds.includes(l.id)) {
+					return getListWithItemRemoved(l)
+				}
+				return l
+			})	
+		})
+	}
+
+	const getListWithItemRemoved = (l: List): List => {
+		const updatedItems: Item[] = l.items.filter(i => i.id !== item.id)
+		const updatedList: List = {
+			...l,
+			items: updatedItems
+		}
+		return updatedList
 	}
 
 	const deleteLinkFromMasterListItem = () => {
@@ -34,11 +54,22 @@ const useItem = (list: List, item: Item) => {
 			}
 			return i
 		})
-		const updatedMasterList: List = {
-			...masterList,
+		setMasterList((previousMasterList) => ({
+			...previousMasterList,
 			items: updatedMasterListItems
-		}
-		setMasterList(updatedMasterList)
+		}))
+	}
+
+	const deleteItemFromList = () => {
+		const updatedList: List = getListWithItemRemoved(list)
+		setLists((previousLists) => {
+			return previousLists.map(l => {
+				if (l.id === list.id) {
+					return updatedList
+				}
+				return l
+			})
+		})
 	}
 
 	return {
