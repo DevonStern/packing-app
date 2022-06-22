@@ -1,14 +1,10 @@
 import { IonBackButton, IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 import { checkbox, checkboxOutline } from 'ionicons/icons';
 import { RouteComponentProps } from 'react-router-dom';
-import { atom, useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { multiSelectState } from '../state/state';
 import { List, listsState } from './listModel';
 import ListView from './ListView';
-
-export const multiSelectState = atom<boolean>({
-	key: 'multiSelectState',
-	default: false,
-})
 
 interface ListPageProps extends RouteComponentProps<{
 	listId: string

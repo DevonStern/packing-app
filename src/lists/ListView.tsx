@@ -6,10 +6,10 @@ import { List } from "./listModel"
 import Modal from "../general/Modal"
 import ItemSelect from "../items/ItemSelect"
 import Fab from "../general/Fab"
-import { multiSelectState } from "./ListPage"
-import { useRecoilValue } from "recoil"
+import { useRecoilState, useRecoilValue } from "recoil"
 import ItemSelectRow from "../items/ItemSelectRow"
-import { Item } from "../items/itemModel"
+import { multiSelectState, selectedItemsState } from "../state/state"
+import MultiSelectActions from "../general/MultiSelectActions"
 
 interface ListViewProps {
 	list: List
@@ -17,9 +17,9 @@ interface ListViewProps {
 
 const ListView: React.FC<ListViewProps> = ({ list }) => {
 	const isMultiSelectMode = useRecoilValue(multiSelectState)
+	const [selectedItems, setSelectedItems] = useRecoilState(selectedItemsState)
 
 	const [isAddItemInputOpen, setIsAddItemInputOpen] = useState<boolean>(false)
-	const [selectedItems, setSelectedItems] = useState<Item[]>([])
 
 	return (
 		<>
@@ -36,7 +36,11 @@ const ListView: React.FC<ListViewProps> = ({ list }) => {
 					return <ItemRow key={item.id} list={list} item={item} />
 				})}
 			</IonList>
-			<Fab onClick={() => setIsAddItemInputOpen(true)} />
+			{!isMultiSelectMode ?
+				<Fab onClick={() => setIsAddItemInputOpen(true)} />
+				:
+				<MultiSelectActions />
+			}
 			<Modal isOpen={isAddItemInputOpen} setIsOpen={setIsAddItemInputOpen}>
 				{list.isMaster ?
 					<AddItemInput list={list} />
