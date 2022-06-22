@@ -39,7 +39,7 @@ const ListView: React.FC<ListViewProps> = ({ list }) => {
 			{!isMultiSelectMode ?
 				<Fab onClick={() => setIsAddItemInputOpen(true)} />
 				:
-				<MultiSelectActions />
+				<MultiSelectActions list={list} />
 			}
 			<Modal isOpen={isAddItemInputOpen} setIsOpen={setIsAddItemInputOpen}>
 				{list.isMaster ?

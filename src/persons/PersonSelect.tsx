@@ -1,5 +1,5 @@
 import { IonSelect, IonSelectOption } from "@ionic/react"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useRecoilValue, useSetRecoilState } from "recoil"
 import { DEFAULT_ITEM_STATE, Item, ItemPerson, itemState, ItemState } from "../items/itemModel"
 import { List } from "../lists/listModel"
@@ -8,9 +8,10 @@ import { Person, personsState } from "./personModel"
 interface PersonSelectProps {
 	list: List
 	item: Item
+	openSelect?: boolean
 }
 
-const PersonSelect: React.FC<PersonSelectProps> = ({ list, item }) => {
+const PersonSelect: React.FC<PersonSelectProps> = ({ list, item, openSelect }) => {
 	const setItem = useSetRecoilState(itemState({
 		listId: list.id,
 		itemId: item.id,
@@ -19,6 +20,14 @@ const PersonSelect: React.FC<PersonSelectProps> = ({ list, item }) => {
 	const persons = useRecoilValue(personsState)
 
 	const [ids, setIds] = useState<string[]>(item.persons.map(ip => ip.person.id))
+
+	const selectRef = useRef<HTMLIonSelectElement | null>(null)
+
+	useEffect(() => {
+		if (openSelect) {
+			selectRef.current?.open()
+		}
+	}, [openSelect])
 
 	useEffect(() => {
 		const doIdsMatch: boolean = JSON.stringify(ids) === JSON.stringify(item.persons.map(ip => ip.person.id))
@@ -47,6 +56,7 @@ const PersonSelect: React.FC<PersonSelectProps> = ({ list, item }) => {
 
 	return (
 		<IonSelect
+			ref={selectRef}
 			multiple
 			value={ids}
 			onIonChange={event => setIds(event.detail.value)}
