@@ -3,7 +3,7 @@ import { bagCheck, ellipsisVertical, person, pricetag } from "ionicons/icons"
 import { useEffect, useState } from "react"
 import { useRecoilValue } from "recoil"
 import { List } from "../lists/listModel"
-import PersonSelectForMultipleItems from "../persons/PersonSelectForMultipleItems"
+import PersonSelect from "../persons/PersonSelect"
 import { selectedItemsState } from "../state/state"
 
 interface MultiSelectActionsProps {
@@ -49,8 +49,8 @@ const MultiSelectActions: React.FC<MultiSelectActionsProps> = ({ list }) => {
 					</IonFabButton>
 				</IonFabList>
 			</IonFab>
-			<div style={{display: 'none'}}>
-				<PersonSelectForMultipleItems list={list} selectedItems={selectedItems} openSelect={openPersonSelect} />
+			<div style={{ display: 'none' }}>
+				<PersonSelect list={list} selectedItems={selectedItems} openSelect={openPersonSelect} />
 			</div>
 		</>
 	)

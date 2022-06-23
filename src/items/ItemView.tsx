@@ -65,7 +65,7 @@ const ItemView: React.FC<ItemViewProps> = ({ list, item }) => {
 				{persons.length > 0 ? (
 					<IonItem>
 						<IonLabel>People</IonLabel>
-						<PersonSelect list={list} item={item} />
+						<PersonSelect list={list} selectedItems={[item]} />
 					</IonItem>
 				) : null}
 				{hasPersons ? (
