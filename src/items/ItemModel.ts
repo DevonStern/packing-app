@@ -9,6 +9,7 @@ export interface Item {
 	name: string
 	persons: ItemPerson[]
 	state: ItemState
+	tags: string[]
 }
 
 export enum ItemState {
@@ -30,16 +31,19 @@ export const makeItem = (name: string): Item => ({
 	name,
 	persons: [],
 	state: DEFAULT_ITEM_STATE,
+	tags: [],
 })
 
 export const itemsRestorer = (savedItems: any): Item[] => {
 	const items: Item[] = savedItems.map((item: Item) => {
 		const state: ItemState = item.state ?? DEFAULT_ITEM_STATE
 		const persons: ItemPerson[] = item.persons ?? []
+		const tags: string[] = item.tags ?? []
 		const updatedItem: Item = {
 			...item,
 			state,
 			persons,
+			tags,
 		}
 		return updatedItem
 	})
