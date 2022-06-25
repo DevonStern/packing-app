@@ -1,5 +1,17 @@
 import { ItemPerson, ItemState } from "../items/itemModel";
 
+export const getItemStateKeys = (): string[] => {
+	const keys: string[] = Object.keys(ItemState)
+	//All keys and values are included in the array for reverse lookup, so get first half
+	return keys.slice(0, keys.length / 2)
+}
+
+export const getItemStateValues = (): (string | ItemState)[] => {
+	const values: (string | ItemState)[] = Object.values(ItemState)
+	//All keys and values are included in the array for reverse lookup, so get first half
+	return values.slice(0, values.length / 2)
+}
+
 export const getNextItemState = (currentValue: ItemState): ItemState => {
 	//All keys and values are included in the array for reverse lookup, so divide by 2
 	const numValues: number = Object.values(ItemState).length / 2

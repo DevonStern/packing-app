@@ -48,8 +48,39 @@ const useItemState = (list: List, item: Item) => {
 		setItem(updatedItem)
 	}
 
+	const setWholeState = (state: ItemState) => {
+		if (hasPersons) {
+			setItemPersonStates(state)
+		} else {
+			setMainItemState(state)
+		}
+	}
+
+	const setItemPersonStates = (state: ItemState) => {
+		const updatedItemPersons: ItemPerson[] = item.persons.map(ip => {
+			return {
+				...ip,
+				state
+			}
+		})
+		const updatedItem: Item = {
+			...item,
+			persons: updatedItemPersons
+		}
+		setItem(updatedItem)
+	}
+
+	const setMainItemState = (state: ItemState) => {
+		const updatedItem: Item = {
+			...item,
+			state
+		}
+		setItem(updatedItem)
+	}
+
 	return {
 		moveWholeState,
+		setWholeState,
 	}
 }
 
