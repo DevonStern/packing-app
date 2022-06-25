@@ -1,10 +1,11 @@
-import { IonBadge, IonChip, IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding, IonLabel } from "@ionic/react"
+import { IonBadge, IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding, IonLabel } from "@ionic/react"
 import { trash } from "ionicons/icons"
 import { useHistory } from "react-router-dom"
 import useItemInfo from "./useItemInfo"
 import { List } from "../lists/listModel"
 import { Item, ItemState } from "./itemModel"
 import useItem from "./useItem"
+import ItemStateChip from "./ItemStateChip"
 
 interface ItemRowProps {
 	list: List
@@ -29,22 +30,16 @@ const ItemRow: React.FC<ItemRowProps> = ({ list, item }) => {
 			<IonItemSliding>
 				<IonItem onClick={goToItem}>
 					<IonLabel>{item.name}</IonLabel>
-					<IonChip
-						color={isItemFullyLoaded ? 'success' : 'secondary'}
-						outline={!isItemFullyLoaded}
-					>
-						{stateText}
-					</IonChip>
 					{item.persons.map(ip => (
 						<IonBadge
 							key={ip.person.id}
-							slot="end"
 							mode="ios"
 							color={ip.state === ItemState.LOADED ? 'success' : 'primary'}
 						>
 							{ip.person.name.slice(0, 1)}
 						</IonBadge>
 					))}
+					<ItemStateChip item={item} />
 				</IonItem>
 				<IonItemOptions side="start">
 					<IonItemOption color="danger" onClick={deleteItem}>

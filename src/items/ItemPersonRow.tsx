@@ -1,7 +1,7 @@
-import { IonItem, IonLabel } from "@ionic/react"
+import { IonChip, IonItem, IonLabel } from "@ionic/react"
 import { useSetRecoilState } from "recoil"
 import { List } from "../lists/listModel"
-import { getItemPersonWithNextState } from "../utils/itemStateUtils"
+import { getItemPersonWithNextState, isLastItemState } from "../utils/itemStateUtils"
 import { Item, ItemPerson, itemState, ItemState } from "./itemModel"
 import MoveItemStateButton from "./MoveItemStateButton"
 
@@ -37,7 +37,16 @@ const ItemPersonRow: React.FC<ItemPersonRowProps> = ({ list, item, itemPerson })
 
 	return (
 		<IonItem lines="none">
-			<IonLabel>{person.name}'s {item.name}: {ItemState[state]}</IonLabel>
+			<IonLabel>
+				{person.name}'s {item.name}:
+			</IonLabel>
+			<IonChip
+				color={isLastItemState(state) ? 'success' : 'secondary'}
+				outline={!isLastItemState(state)}
+			>
+				{ItemState[state]}
+			</IonChip>
+			→&nbsp;
 			<MoveItemStateButton
 				state={state}
 				onClick={moveItemPersonState}
