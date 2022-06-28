@@ -1,65 +1,22 @@
 import { IonButton, IonList } from "@ionic/react"
 import { useState } from "react"
-import { useRecoilState } from "recoil"
+import { useRecoilValue } from "recoil"
 import { List, masterListState } from "../lists/listModel"
 import { Item, itemsState } from "./itemModel"
 import ItemSelectRow from "./ItemSelectRow"
+import useItems from "./useItems"
 
 interface ItemSelectProps {
 	list: List
 }
 
 const ItemSelect: React.FC<ItemSelectProps> = ({ list }) => {
-	const [items, setItems] = useRecoilState(itemsState(list.id))
-	const [masterList, setMasterList] = useRecoilState(masterListState)
+	const items = useRecoilValue(itemsState(list.id))
+	const masterList = useRecoilValue(masterListState)
 
 	const [selectedItems, setSelectedItems] = useState<Item[]>([])
 
-	const addItems = () => {
-		addItemsToList()
-		addListToMasterItems()
-	}
-
-	const addItemsToList = () => {
-		const selectedItemsWithoutListIds: Item[] = selectedItems.map<Item>(item => ({
-			...item,
-			assignedToListIds: undefined
-		}))
-		const updatedItems: Item[] = [
-			...items,
-			...selectedItemsWithoutListIds
-		]
-		setItems(updatedItems)
-	}
-
-	const addListToMasterItems = () => {
-		const selectedItemsWithListIds: Item[] = selectedItems.map<Item>(item => ({
-			...item,
-			assignedToListIds: getAssignedToListIds(item)
-		}))
-		const updatedMasterItems: Item[] = masterList.items.map(item => {
-			const selectedItem: Item | undefined = selectedItemsWithListIds.find(selectedItem => selectedItem.id === item.id)
-			if (selectedItem) {
-				return selectedItem
-			}
-			return item
-		})
-		const updatedMasterList: List = {
-			...masterList,
-			items: updatedMasterItems
-		}
-		setMasterList(updatedMasterList)
-	}
-
-	const getAssignedToListIds = (item: Item): string[] => {
-		if (item.assignedToListIds) {
-			return [
-				...item.assignedToListIds,
-				list.id
-			]
-		}
-		return [list.id]
-	}
+	const { addItems } = useItems(list)
 
 	return (
 		<>
@@ -79,7 +36,7 @@ const ItemSelect: React.FC<ItemSelectProps> = ({ list }) => {
 					)
 				})}
 			</IonList>
-			<IonButton expand="block" onClick={addItems}>
+			<IonButton expand="block" onClick={() => addItems(selectedItems)}>
 				Add
 			</IonButton>
 		</>

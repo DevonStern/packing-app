@@ -1,10 +1,9 @@
 import { IonBadge, IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding, IonLabel } from "@ionic/react"
 import { trash } from "ionicons/icons"
 import { useHistory } from "react-router-dom"
-import useItemInfo from "./useItemInfo"
 import { List } from "../lists/listModel"
 import { Item, ItemState } from "./itemModel"
-import useItem from "./useItem"
+import useItems from "./useItems"
 import ItemStateChip from "./ItemStateChip"
 
 interface ItemRowProps {
@@ -14,8 +13,7 @@ interface ItemRowProps {
 
 const ItemRow: React.FC<ItemRowProps> = ({ list, item }) => {
 	const history = useHistory()
-	const { stateText, isItemFullyLoaded } = useItemInfo(item)
-	const { deleteItem } = useItem(list, item)
+	const { deleteItem } = useItems(list)
 
 	const goToItem = () => {
 		if (list.isMaster) {
@@ -42,7 +40,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ list, item }) => {
 					<ItemStateChip item={item} />
 				</IonItem>
 				<IonItemOptions side="start">
-					<IonItemOption color="danger" onClick={deleteItem}>
+					<IonItemOption color="danger" onClick={() => deleteItem(item)}>
 						<IonIcon slot="icon-only" icon={trash} size="large" />
 					</IonItemOption>
 				</IonItemOptions>

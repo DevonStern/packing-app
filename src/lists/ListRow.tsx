@@ -1,25 +1,19 @@
 import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from "@ionic/react"
 import { trash } from "ionicons/icons"
 import { useHistory } from "react-router-dom"
-import { useRecoilState } from "recoil"
-import { List, listsState } from "./listModel"
+import { List } from "./listModel"
+import useLists from "./useLists"
 
 interface ListRowProps {
 	list: List
 }
 
 const ListRow: React.FC<ListRowProps> = ({ list }) => {
-	const [lists, setLists] = useRecoilState(listsState)
-
 	const history = useHistory()
+	const { deleteList } = useLists()
 
 	const goToList = () => {
 		history.push(`/list/${list.id}`)
-	}
-
-	const deleteList = () => {
-		const newLists: List[] = lists.filter(l => l.id !== list.id)
-		setLists(newLists)
 	}
 
 	return (
@@ -29,7 +23,7 @@ const ListRow: React.FC<ListRowProps> = ({ list }) => {
 					{list.name}
 				</IonItem>
 				<IonItemOptions side="start">
-					<IonItemOption color="danger" onClick={deleteList}>
+					<IonItemOption color="danger" onClick={() => deleteList(list.id)}>
 						<IonIcon slot="icon-only" icon={trash} size="large" />
 					</IonItemOption>
 				</IonItemOptions>
