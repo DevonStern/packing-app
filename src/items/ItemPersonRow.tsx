@@ -1,9 +1,9 @@
 import { IonChip, IonItem, IonLabel } from "@ionic/react"
-import { useSetRecoilState } from "recoil"
 import { List } from "../lists/listModel"
-import { getItemPersonWithNextState, isLastItemState } from "../utils/itemStateUtils"
-import { Item, ItemPerson, itemState, ItemState } from "./itemModel"
+import { isLastItemState } from "../utils/itemStateUtils"
+import { Item, ItemPerson, ItemState } from "./itemModel"
 import MoveItemStateButton from "./MoveItemStateButton"
+import useItems from "./useItems"
 
 interface ItemPersonRowProps {
 	list: List
@@ -12,28 +12,9 @@ interface ItemPersonRowProps {
 }
 
 const ItemPersonRow: React.FC<ItemPersonRowProps> = ({ list, item, itemPerson }) => {
-	const setItem = useSetRecoilState(itemState({
-		listId: list.id,
-		itemId: item.id,
-		toJSON: () => JSON.stringify({ listId: list.id, itemId: item.id }),
-	}))
+	const { advanceItemPersonState } = useItems(list)
 	
 	const { person, state } = itemPerson
-
-	const moveItemPersonState = () => {
-		const updatedItemPerson: ItemPerson = getItemPersonWithNextState(itemPerson)
-		const updatedItemPersons: ItemPerson[] = item.persons.map(ip => {
-			if (ip.person.id === itemPerson.person.id) {
-				return updatedItemPerson
-			}
-			return ip
-		})
-		const updatedItem: Item = {
-			...item,
-			persons: updatedItemPersons
-		}
-		setItem(updatedItem)
-	}
 
 	return (
 		<IonItem lines="none">
@@ -49,7 +30,7 @@ const ItemPersonRow: React.FC<ItemPersonRowProps> = ({ list, item, itemPerson })
 			→&nbsp;
 			<MoveItemStateButton
 				state={state}
-				onClick={moveItemPersonState}
+				onClick={() => advanceItemPersonState(item, itemPerson)}
 			/>
 		</IonItem>
 	)

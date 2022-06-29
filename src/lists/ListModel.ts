@@ -1,4 +1,4 @@
-import { atom, DefaultValue, selector, selectorFamily } from "recoil"
+import { atom, DefaultValue, selector } from "recoil"
 import { Item, itemsRestorer } from "../items/itemModel"
 import { v4 as uuid } from "uuid";
 import { makePersistenceEffect } from "../utils/persistenceUtils";
@@ -46,33 +46,6 @@ export const listsState = atom<List[]>({
 	effects: [
 		makePersistenceEffect(STORAGE_KEY_LISTS, listsRestorer)
 	],
-})
-
-export const listState = selectorFamily<List, string>({
-	key: 'listState',
-	get: (id) => ({ get }) => {
-		const currentValue: List | undefined = get(listsState).find(value => value.id === id)
-		if (!currentValue) {
-			throw new Error("Where'd the thing go?")
-		}
-		return currentValue
-	},
-	set: (id) => ({ get, set }, updatedValue) => {
-		if (updatedValue instanceof DefaultValue) {
-			throw new Error("I don't know what the heck is going on.")
-		}
-		const currentValue: List | undefined = get(listsState).find(value => value.id === id)
-		if (!currentValue) {
-			throw new Error("Where'd the thing go?")
-		}
-		const updatedValues: List[] = get(listsState).map(value => {
-			if (currentValue.id === value.id) {
-				return updatedValue
-			}
-			return value
-		})
-		set(listsState, updatedValues)
-	},
 })
 
 export const masterListState = selector<List>({

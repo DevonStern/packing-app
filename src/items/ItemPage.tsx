@@ -1,11 +1,12 @@
 import { IonBackButton, IonButtons, IonContent, IonHeader, IonInput, IonPage, IonTitle, IonToolbar } from "@ionic/react"
 import { useRef, useState } from "react"
 import { RouteComponentProps } from "react-router-dom"
-import { useRecoilValue, useSetRecoilState } from "recoil"
+import { useRecoilValue } from "recoil"
 import useInputFocus from "../general/useInputFocus"
 import { List, listsState } from "../lists/listModel"
-import { Item, itemState } from "./itemModel"
+import { Item } from "./itemModel"
 import ItemView from "./ItemView"
+import useItems from "./useItems"
 
 interface ItemPageProps extends RouteComponentProps<{
 	listId: string
@@ -15,7 +16,7 @@ interface ItemPageProps extends RouteComponentProps<{
 
 const ItemPage: React.FC<ItemPageProps> = ({ match: { params: { listId, itemId } } }) => {
 	const lists = useRecoilValue(listsState)
-	
+
 	const list: List | undefined = lists.find(l => l.id === listId)
 	const item: Item | undefined = list?.items.find(i => i.id === itemId)
 	if (!list || !item) {
@@ -81,14 +82,9 @@ interface ItemNameInputProps {
 }
 
 const ItemNameInput: React.FC<ItemNameInputProps> = ({ list, item, setIsEditingName }) => {
-	const setItem = useSetRecoilState(itemState({
-		listId: list.id,
-		itemId: item.id,
-		toJSON: () => JSON.stringify({ listId: list.id, itemId: item.id }),
-	}))
-
 	const [name, setName] = useState<string>(item.name)
 
+	const { updateItemName } = useItems(list)
 	const inputRef = useRef<HTMLIonInputElement | null>(null)
 	useInputFocus(inputRef)
 
@@ -96,11 +92,7 @@ const ItemNameInput: React.FC<ItemNameInputProps> = ({ list, item, setIsEditingN
 		if (!name.trim()) {
 			setName(item.name)
 		} else {
-			const updatedItem: Item = {
-				...item,
-				name: name.trim(),
-			}
-			setItem(updatedItem)
+			updateItemName(item, name)
 		}
 		setIsEditingName(false)
 	}

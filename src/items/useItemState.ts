@@ -1,16 +1,11 @@
-import { useSetRecoilState } from "recoil"
 import { List } from "../lists/listModel"
 import { getItemPersonWithNextState, getNextItemState, isLastItemState } from "../utils/itemStateUtils"
-import { Item, ItemPerson, itemState, ItemState } from "./itemModel"
+import { Item, ItemPerson, ItemState } from "./itemModel"
 import useItemInfo from "./useItemInfo"
+import useItems from "./useItems"
 
 const useItemState = (list: List, item: Item) => {
-	const setItem = useSetRecoilState(itemState({
-		listId: list.id,
-		itemId: item.id,
-		toJSON: () => JSON.stringify({ listId: list.id, itemId: item.id }),
-	}))
-	
+	const { setItem } = useItems(list)
 	const { hasPersons, lowestItemState } = useItemInfo(item)
 
 	const moveWholeState = () => {
@@ -34,7 +29,7 @@ const useItemState = (list: List, item: Item) => {
 			...item,
 			persons: updatedItemPersons
 		}
-		setItem(updatedItem)
+		setItem(item, updatedItem)
 	}
 
 	const moveMainItemState = () => {
@@ -45,7 +40,7 @@ const useItemState = (list: List, item: Item) => {
 			...item,
 			state: nextState,
 		}
-		setItem(updatedItem)
+		setItem(item, updatedItem)
 	}
 
 	const setWholeState = (state: ItemState) => {
@@ -67,7 +62,7 @@ const useItemState = (list: List, item: Item) => {
 			...item,
 			persons: updatedItemPersons
 		}
-		setItem(updatedItem)
+		setItem(item, updatedItem)
 	}
 
 	const setMainItemState = (state: ItemState) => {
@@ -75,7 +70,7 @@ const useItemState = (list: List, item: Item) => {
 			...item,
 			state
 		}
-		setItem(updatedItem)
+		setItem(item, updatedItem)
 	}
 
 	return {
