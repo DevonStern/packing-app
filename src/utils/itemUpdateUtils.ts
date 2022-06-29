@@ -33,10 +33,10 @@ const getUpdatedListFromMasterListItem = (list: List, masterListItem: Item): Lis
 const getUpdatedListItemFromMasterListItem = (item: Item, masterListItem: Item): Item => {
 	const updatedItem: Item = {
 		...item,
-		name: masterListItem.name,
-		persons: masterListItem.persons,
-		state: masterListItem.state,
-		tags: masterListItem.tags,
+		name: item.overriddenProps?.includes('name') ? item.name : masterListItem.name,
+		persons: item.overriddenProps?.includes('persons') ? item.persons : masterListItem.persons,
+		state: item.overriddenProps?.includes('state') ? item.state : masterListItem.state,
+		tags: item.overriddenProps?.includes('tags') ? item.tags : masterListItem.tags,
 	}
 	return updatedItem
 }
