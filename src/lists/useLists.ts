@@ -1,5 +1,5 @@
 import { useRecoilState } from "recoil"
-import { List, listsState, makeList } from "./listModel"
+import { List, listsState, makeList } from "./listModels"
 
 const useLists = () => {
 	const [lists, setLists] = useRecoilState(listsState)

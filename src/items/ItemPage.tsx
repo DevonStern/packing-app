@@ -3,10 +3,10 @@ import { useRef, useState } from "react"
 import { RouteComponentProps } from "react-router-dom"
 import { useRecoilValue } from "recoil"
 import useInputFocus from "../general/useInputFocus"
-import { List, listsState } from "../lists/listModel"
-import { Item } from "./itemModel"
+import { List, listsState } from "../lists/listModels"
+import { Item } from "./itemModels"
 import ItemView from "./ItemView"
-import useItems from "./useItems"
+import useListItems from "./useListItems"
 
 interface ItemPageProps extends RouteComponentProps<{
 	listId: string
@@ -84,7 +84,7 @@ interface ItemNameInputProps {
 const ItemNameInput: React.FC<ItemNameInputProps> = ({ list, item, setIsEditingName }) => {
 	const [name, setName] = useState<string>(item.name)
 
-	const { updateItemName } = useItems(list)
+	const { updateItemName } = useListItems(list)
 	const inputRef = useRef<HTMLIonInputElement | null>(null)
 	useInputFocus(inputRef)
 

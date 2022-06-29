@@ -1,10 +1,10 @@
 import { IonButton, IonList } from "@ionic/react"
 import { useState } from "react"
 import { useRecoilValue } from "recoil"
-import { List, masterListState } from "../lists/listModel"
-import { Item } from "./itemModel"
+import { List, masterListState } from "../lists/listModels"
+import { Item } from "./itemModels"
 import ItemSelectRow from "./ItemSelectRow"
-import useItems from "./useItems"
+import useListItems from "./useListItems"
 
 interface ItemSelectProps {
 	list: List
@@ -15,7 +15,7 @@ const ItemSelect: React.FC<ItemSelectProps> = ({ list }) => {
 
 	const [selectedItems, setSelectedItems] = useState<Item[]>([])
 
-	const { assignItems: addItems } = useItems(list)
+	const { assignItems: addItems } = useListItems(list)
 
 	return (
 		<>

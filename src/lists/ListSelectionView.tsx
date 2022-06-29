@@ -4,7 +4,7 @@ import { useRecoilValue } from "recoil"
 import Fab from "../general/Fab"
 import Modal from "../general/Modal"
 import AddListInput from "./AddListInput"
-import { listsState } from "./listModel"
+import { listsState } from "./listModels"
 import ListRow from "./ListRow"
 
 const ListSelectionView: React.FC = () => {

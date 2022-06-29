@@ -1,5 +1,5 @@
 import { atom } from "recoil";
-import { Item } from "../items/itemModel";
+import { Item } from "../items/itemModels";
 
 export const multiSelectState = atom<boolean>({
 	key: 'multiSelectState',

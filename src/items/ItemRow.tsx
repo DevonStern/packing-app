@@ -1,9 +1,9 @@
 import { IonBadge, IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding, IonLabel } from "@ionic/react"
 import { trash } from "ionicons/icons"
 import { useHistory } from "react-router-dom"
-import { List } from "../lists/listModel"
-import { Item, ItemState } from "./itemModel"
-import useItems from "./useItems"
+import { List } from "../lists/listModels"
+import { Item, ItemState } from "./itemModels"
+import useListItems from "./useListItems"
 import ItemStateChip from "./ItemStateChip"
 
 interface ItemRowProps {
@@ -13,7 +13,7 @@ interface ItemRowProps {
 
 const ItemRow: React.FC<ItemRowProps> = ({ list, item }) => {
 	const history = useHistory()
-	const { deleteItem } = useItems(list)
+	const { deleteItem } = useListItems(list)
 
 	const goToItem = () => {
 		if (list.isMaster) {

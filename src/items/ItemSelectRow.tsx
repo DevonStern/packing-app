@@ -1,6 +1,6 @@
 import { CheckboxChangeEventDetail, IonCheckboxCustomEvent } from "@ionic/core"
 import { IonCheckbox, IonItem, IonLabel } from "@ionic/react"
-import { Item } from "./itemModel"
+import { Item } from "./itemModels"
 
 interface ItemSelectRowProps {
 	item: Item

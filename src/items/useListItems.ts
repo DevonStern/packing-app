@@ -1,10 +1,10 @@
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil"
-import { List, listsState, masterListState } from "../lists/listModel"
+import { List, listsState, masterListState } from "../lists/listModels"
 import { Person, personsState } from "../persons/personModel"
 import { getItemPersonWithNextState } from "../utils/itemStateUtils"
-import { DEFAULT_ITEM_STATE, Item, ItemPerson, ItemState, makeItem } from "./itemModel"
+import { DEFAULT_ITEM_STATE, Item, ItemPerson, ItemState, makeItem } from "./itemModels"
 
-const useItems = (list: List) => {
+const useListItems = (list: List) => {
 	const setLists = useSetRecoilState(listsState)
 	const [masterList, setMasterList] = useRecoilState(masterListState)
 	const persons = useRecoilValue(personsState)
@@ -259,4 +259,4 @@ const useItems = (list: List) => {
 	}
 }
 
-export default useItems
+export default useListItems

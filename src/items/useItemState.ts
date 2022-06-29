@@ -1,11 +1,11 @@
-import { List } from "../lists/listModel"
+import { List } from "../lists/listModels"
 import { getItemPersonWithNextState, getNextItemState, isLastItemState } from "../utils/itemStateUtils"
-import { Item, ItemPerson, ItemState } from "./itemModel"
+import { Item, ItemPerson, ItemState } from "./itemModels"
 import useItemInfo from "./useItemInfo"
-import useItems from "./useItems"
+import useListItems from "./useListItems"
 
 const useItemState = (list: List, item: Item) => {
-	const { setItem } = useItems(list)
+	const { setItem } = useListItems(list)
 	const { hasPersons, lowestItemState } = useItemInfo(item)
 
 	const moveWholeState = () => {

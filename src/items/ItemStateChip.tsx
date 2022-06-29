@@ -1,5 +1,5 @@
 import { IonChip } from "@ionic/react"
-import { Item } from "./itemModel"
+import { Item } from "./itemModels"
 import useItemInfo from "./useItemInfo"
 
 interface ItemStateChipProps {

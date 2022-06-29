@@ -1,9 +1,9 @@
 import { IonSelect, IonSelectOption, SelectChangeEventDetail } from "@ionic/react"
 import { useEffect, useRef, useState } from "react"
 import { useRecoilValue } from "recoil"
-import { Item } from "../items/itemModel"
-import useItems from "../items/useItems"
-import { List } from "../lists/listModel"
+import { Item } from "../items/itemModels"
+import useListItems from "../items/useListItems"
+import { List } from "../lists/listModels"
 import { personsState } from "./personModel"
 
 interface PersonSelectProps {
@@ -21,7 +21,7 @@ const PersonSelect: React.FC<PersonSelectProps> = ({ list, selectedItems, openSe
 	const [ids, setIds] = useState<string[]>(defaultValue)
 	const [wasCancelled, setWasCancelled] = useState<boolean>(false)
 
-	const { updateItemPersonsOnItems } = useItems(list)
+	const { updateItemPersonsOnItems } = useListItems(list)
 	const selectRef = useRef<HTMLIonSelectElement | null>(null)
 
 	useEffect(() => {

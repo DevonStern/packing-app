@@ -1,9 +1,9 @@
 import { IonChip, IonItem, IonLabel } from "@ionic/react"
-import { List } from "../lists/listModel"
+import { List } from "../lists/listModels"
 import { isLastItemState } from "../utils/itemStateUtils"
-import { Item, ItemPerson, ItemState } from "./itemModel"
+import { Item, ItemPerson, ItemState } from "./itemModels"
 import MoveItemStateButton from "./MoveItemStateButton"
-import useItems from "./useItems"
+import useListItems from "./useListItems"
 
 interface ItemPersonRowProps {
 	list: List
@@ -12,7 +12,7 @@ interface ItemPersonRowProps {
 }
 
 const ItemPersonRow: React.FC<ItemPersonRowProps> = ({ list, item, itemPerson }) => {
-	const { advanceItemPersonState } = useItems(list)
+	const { advanceItemPersonState } = useListItems(list)
 	
 	const { person, state } = itemPerson
 

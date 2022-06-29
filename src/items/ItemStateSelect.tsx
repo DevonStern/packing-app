@@ -1,9 +1,9 @@
 import { IonSelect, IonSelectOption, SelectChangeEventDetail } from "@ionic/react"
 import { useEffect, useRef, useState } from "react"
-import { List } from "../lists/listModel"
+import { List } from "../lists/listModels"
 import { getItemStateValues, getLowestItemState } from "../utils/itemStateUtils"
-import { Item, ItemState } from "./itemModel"
-import useItems from "./useItems"
+import { Item, ItemState } from "./itemModels"
+import useListItems from "./useListItems"
 
 interface ItemStateSelectProps {
 	list: List
@@ -22,7 +22,7 @@ const ItemStateSelect: React.FC<ItemStateSelectProps> = ({ list, selectedItems, 
 	const [selectedState, setSelectedState] = useState<ItemState | undefined>(defaultValue)
 	const [wasCancelled, setWasCancelled] = useState<boolean>(false)
 
-	const { updateItemStateOnItems } = useItems(list)
+	const { updateItemStateOnItems } = useListItems(list)
 	const selectRef = useRef<HTMLIonSelectElement | null>(null)
 
 	useEffect(() => {

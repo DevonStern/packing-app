@@ -1,13 +1,13 @@
 import AddObjectInput from "../general/AddObjectInput"
-import { List } from "../lists/listModel"
-import useItems from "./useItems"
+import { List } from "../lists/listModels"
+import useListItems from "./useListItems"
 
 interface AddItemInputProps {
 	list: List
 }
 
 const AddItemInput: React.FC<AddItemInputProps> = ({ list }) => {
-	const { createItem } = useItems(list)
+	const { createItem } = useListItems(list)
 
 	return (
 		<AddObjectInput

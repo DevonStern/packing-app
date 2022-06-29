@@ -3,7 +3,7 @@ import { checkbox, checkboxOutline } from 'ionicons/icons';
 import { RouteComponentProps } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { multiSelectState } from '../state/state';
-import { List, listsState } from './listModel';
+import { List, listsState } from './listModels';
 import ListView from './ListView';
 
 interface ListPageProps extends RouteComponentProps<{

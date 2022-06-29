@@ -1,4 +1,4 @@
-import { ItemPerson, ItemState } from "../items/itemModel";
+import { ItemPerson, ItemState } from "../items/itemModels";
 
 export const getItemStateKeys = (): string[] => {
 	const keys: string[] = Object.keys(ItemState)

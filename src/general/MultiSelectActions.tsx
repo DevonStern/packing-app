@@ -3,7 +3,7 @@ import { bagCheck, ellipsisVertical, person, pricetag } from "ionicons/icons"
 import { useEffect, useState } from "react"
 import { useRecoilValue } from "recoil"
 import ItemStateSelect from "../items/ItemStateSelect"
-import { List } from "../lists/listModel"
+import { List } from "../lists/listModels"
 import PersonSelect from "../persons/PersonSelect"
 import { selectedItemsState } from "../state/state"
 

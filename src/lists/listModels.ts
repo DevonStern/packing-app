@@ -1,5 +1,5 @@
 import { atom, DefaultValue, selector } from "recoil"
-import { Item, itemsRestorer } from "../items/itemModel"
+import { Item, itemsRestorer } from "../items/itemModels"
 import { v4 as uuid } from "uuid";
 import { makePersistenceEffect } from "../utils/persistenceUtils";
 

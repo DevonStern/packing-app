@@ -1,7 +1,7 @@
 import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from "@ionic/react"
 import { trash } from "ionicons/icons"
 import { useHistory } from "react-router-dom"
-import { List } from "./listModel"
+import { List } from "./listModels"
 import useLists from "./useLists"
 
 interface ListRowProps {
