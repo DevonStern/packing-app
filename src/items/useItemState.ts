@@ -2,10 +2,12 @@ import { List } from "../lists/listModels"
 import { getItemPersonWithNextState, getNextItemState, isLastItemState } from "../utils/itemStateUtils"
 import { Item, ItemPerson, ItemState } from "./itemModels"
 import useItemInfo from "./useItemInfo"
+import useItemUpdates from "./useItemUpdates"
 import useListItems from "./useListItems"
 
 const useItemState = (list: List, item: Item) => {
 	const { setItem } = useListItems(list)
+	const { getItemWithOverriddenPropIfNeeded } = useItemUpdates()
 	const { hasPersons, lowestItemState } = useItemInfo(item)
 
 	const moveWholeState = () => {
@@ -17,8 +19,9 @@ const useItemState = (list: List, item: Item) => {
 	}
 
 	const moveLowestItemPersonStates = () => {
-		const itemPersonsWithLowestState: ItemPerson[] = item.persons.filter(ip => ip.state === lowestItemState)
-		const updatedItemPersons: ItemPerson[] = item.persons.map(ip => {
+		const itemWithOverriddenProp: Item = getItemWithOverriddenPropIfNeeded(list, item, 'persons')
+		const itemPersonsWithLowestState: ItemPerson[] = itemWithOverriddenProp.persons.filter(ip => ip.state === lowestItemState)
+		const updatedItemPersons: ItemPerson[] = itemWithOverriddenProp.persons.map(ip => {
 			const isPersonInLowestState: boolean = itemPersonsWithLowestState.some(lowestIP => lowestIP.person.id === ip.person.id)
 			if (isPersonInLowestState) {
 				return getItemPersonWithNextState(ip)
@@ -26,7 +29,7 @@ const useItemState = (list: List, item: Item) => {
 			return ip
 		})
 		const updatedItem: Item = {
-			...item,
+			...itemWithOverriddenProp,
 			persons: updatedItemPersons
 		}
 		setItem(item, updatedItem)
@@ -35,9 +38,10 @@ const useItemState = (list: List, item: Item) => {
 	const moveMainItemState = () => {
 		if (isLastItemState(item.state)) return
 
-		const nextState: ItemState = getNextItemState(item.state)
+		const itemWithOverriddenProp: Item = getItemWithOverriddenPropIfNeeded(list, item, 'state')
+		const nextState: ItemState = getNextItemState(itemWithOverriddenProp.state)
 		const updatedItem: Item = {
-			...item,
+			...itemWithOverriddenProp,
 			state: nextState,
 		}
 		setItem(item, updatedItem)
@@ -52,22 +56,24 @@ const useItemState = (list: List, item: Item) => {
 	}
 
 	const setItemPersonStates = (state: ItemState) => {
-		const updatedItemPersons: ItemPerson[] = item.persons.map(ip => {
+		const itemWithOverriddenProp: Item = getItemWithOverriddenPropIfNeeded(list, item, 'persons')
+		const updatedItemPersons: ItemPerson[] = itemWithOverriddenProp.persons.map(ip => {
 			return {
 				...ip,
 				state
 			}
 		})
 		const updatedItem: Item = {
-			...item,
+			...itemWithOverriddenProp,
 			persons: updatedItemPersons
 		}
 		setItem(item, updatedItem)
 	}
 
 	const setMainItemState = (state: ItemState) => {
+		const itemWithOverriddenProp: Item = getItemWithOverriddenPropIfNeeded(list, item, 'state')
 		const updatedItem: Item = {
-			...item,
+			...itemWithOverriddenProp,
 			state
 		}
 		setItem(item, updatedItem)

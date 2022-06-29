@@ -4,6 +4,7 @@ import { Person } from "../persons/personModel";
 export interface Item {
 	id: string
 	assignedToListIds?: string[] //For master list items only
+	overriddenProps?: ('name' | 'persons' | 'state' | 'tags')[] //For trip list items only
 	name: string
 	persons: ItemPerson[]
 	state: ItemState

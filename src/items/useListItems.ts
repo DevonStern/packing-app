@@ -3,11 +3,14 @@ import { List, listsState, masterListState } from "../lists/listModels"
 import { Person, personsState } from "../persons/personModel"
 import { getItemPersonWithNextState } from "../utils/itemStateUtils"
 import { DEFAULT_ITEM_STATE, Item, ItemPerson, ItemState, makeItem } from "./itemModels"
+import useItemUpdates from "./useItemUpdates"
 
 const useListItems = (list: List) => {
 	const setLists = useSetRecoilState(listsState)
 	const [masterList, setMasterList] = useRecoilState(masterListState)
 	const persons = useRecoilValue(personsState)
+
+	const { getItemWithOverriddenPropIfNeeded } = useItemUpdates()
 
 	const setItem = (item: Item, updatedItem: Item) => {
 		const updatedItems: Item[] = list.items.map(i => {
@@ -63,10 +66,10 @@ const useListItems = (list: List) => {
 	}
 
 	const addItemsToList = (selectedItems: Item[]) => {
-		const selectedItemsWithoutListIds: Item[] = selectedItems.map<Item>(item => ({
-			...item,
-			assignedToListIds: undefined
-		}))
+		const selectedItemsWithoutListIds: Item[] = selectedItems.map<Item>(item => {
+			const { assignedToListIds, ...itemWithoutListIds } = item
+			return itemWithoutListIds
+		})
 		const updatedItems: Item[] = [
 			...list.items,
 			...selectedItemsWithoutListIds
@@ -182,22 +185,24 @@ const useListItems = (list: List) => {
 	}
 
 	const getUpdatedItemPersonStates = (item: Item, state: ItemState): Item => {
-		const updatedItemPersons: ItemPerson[] = item.persons.map(ip => {
+		const itemWithOverriddenProp: Item = getItemWithOverriddenPropIfNeeded(list, item, 'persons')
+		const updatedItemPersons: ItemPerson[] = itemWithOverriddenProp.persons.map(ip => {
 			return {
 				...ip,
 				state
 			}
 		})
 		const updatedItem: Item = {
-			...item,
+			...itemWithOverriddenProp,
 			persons: updatedItemPersons
 		}
 		return updatedItem
 	}
 
 	const getUpdatedMainItemState = (item: Item, state: ItemState): Item => {
+		const itemWithOverriddenProp: Item = getItemWithOverriddenPropIfNeeded(list, item, 'state')
 		const updatedItem: Item = {
-			...item,
+			...itemWithOverriddenProp,
 			state
 		}
 		return updatedItem
@@ -209,8 +214,9 @@ const useListItems = (list: List) => {
 	}
 
 	const getItemWithUpdatedPersons = (item: Item, updatedPersons: Person[]): Item => {
+		const itemWithOverriddenProp: Item = getItemWithOverriddenPropIfNeeded(list, item, 'persons')
 		const updatedItemPersons: ItemPerson[] = updatedPersons.map(person => {
-			const currentItemPerson: ItemPerson | undefined = item.persons.find(ip => ip.person.id === person.id)
+			const currentItemPerson: ItemPerson | undefined = itemWithOverriddenProp.persons.find(ip => ip.person.id === person.id)
 			const state: ItemState = currentItemPerson?.state ?? DEFAULT_ITEM_STATE
 			const updatedItemPerson: ItemPerson = {
 				person,
@@ -219,29 +225,31 @@ const useListItems = (list: List) => {
 			return updatedItemPerson
 		})
 		return {
-			...item,
+			...itemWithOverriddenProp,
 			persons: updatedItemPersons
 		}
 	}
 
 	const updateItemName = (item: Item, name: string) => {
+		const itemWithOverriddenProp: Item = getItemWithOverriddenPropIfNeeded(list, item, 'name')
 		const updatedItem: Item = {
-			...item,
+			...itemWithOverriddenProp,
 			name,
 		}
 		setItem(item, updatedItem)
 	}
 
 	const advanceItemPersonState = (item: Item, itemPerson: ItemPerson) => {
+		const itemWithOverriddenProp: Item = getItemWithOverriddenPropIfNeeded(list, item, 'persons')
 		const updatedItemPerson: ItemPerson = getItemPersonWithNextState(itemPerson)
-		const updatedItemPersons: ItemPerson[] = item.persons.map(ip => {
+		const updatedItemPersons: ItemPerson[] = itemWithOverriddenProp.persons.map(ip => {
 			if (ip.person.id === itemPerson.person.id) {
 				return updatedItemPerson
 			}
 			return ip
 		})
 		const updatedItem: Item = {
-			...item,
+			...itemWithOverriddenProp,
 			persons: updatedItemPersons
 		}
 		setItem(item, updatedItem)
