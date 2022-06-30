@@ -1,4 +1,4 @@
-import { ItemPerson, ItemState } from "../items/itemModels";
+import { Item, ItemPerson, ItemState } from "../items/itemModels";
 
 export const getItemStateKeys = (): string[] => {
 	const keys: string[] = Object.keys(ItemState)
@@ -36,6 +36,14 @@ export const getLowestItemState = (itemPersons: ItemPerson[]): ItemState => {
 		return currentLowestState
 	}, ItemState.LOADED)
 	return lowestState
+}
+
+export const getCurrentItemState = (item: Item): ItemState => {
+	if (item.persons.length > 0) {
+		return getLowestItemState(item.persons)
+	} else {
+		return item.state
+	}
 }
 
 export const getItemPersonWithNextState = (itemPerson: ItemPerson): ItemPerson => {
