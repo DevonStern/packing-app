@@ -1,10 +1,11 @@
 import { IonBadge, IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding, IonLabel } from "@ionic/react"
-import { trash } from "ionicons/icons"
+import { arrowForwardCircle, trash } from "ionicons/icons"
 import { useHistory } from "react-router-dom"
 import { List } from "../lists/listModels"
 import { Item, ItemState } from "./itemModels"
 import useListItems from "./useListItems"
 import ItemStateChip from "./ItemStateChip"
+import useItemState from "./useItemState"
 
 interface ItemRowProps {
 	list: List
@@ -14,6 +15,7 @@ interface ItemRowProps {
 const ItemRow: React.FC<ItemRowProps> = ({ list, item }) => {
 	const history = useHistory()
 	const { deleteItem } = useListItems(list)
+	const { moveWholeState } = useItemState(list, item)
 
 	const goToItem = () => {
 		if (list.isMaster) {
@@ -21,6 +23,11 @@ const ItemRow: React.FC<ItemRowProps> = ({ list, item }) => {
 		} else {
 			history.push(`/list/${list.id}/item/${item.id}`)
 		}
+	}
+
+	const advanceState = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+		event.stopPropagation()
+		moveWholeState()
 	}
 
 	return (
@@ -32,12 +39,19 @@ const ItemRow: React.FC<ItemRowProps> = ({ list, item }) => {
 						<IonBadge
 							key={ip.person.id}
 							mode="ios"
-							color={ip.state === ItemState.LOADED ? 'success' : 'primary'}
+							color={ip.state === ItemState.LOADED ? 'success' : 'secondary'}
 						>
 							{ip.person.name.slice(0, 1)}
 						</IonBadge>
 					))}
 					<ItemStateChip item={item} />
+					<div onClick={advanceState}>
+						<IonIcon
+							size="large"
+							color="primary"
+							icon={arrowForwardCircle}
+						/>
+					</div>
 				</IonItem>
 				<IonItemOptions side="start">
 					<IonItemOption color="danger" onClick={() => deleteItem(item)}>
