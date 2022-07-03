@@ -35,6 +35,7 @@ import ListPage from './lists/ListPage';
 import PersonsPage from './persons/PersonsPage';
 import ItemPage from './items/ItemPage';
 import OtherPage from './other/OtherPage';
+import TagsPage from './tags/TagsPage';
 
 setupIonicReact();
 
@@ -50,6 +51,7 @@ const App: React.FC = () => (
 					<Route exact path="/:tab(list)/:listId/item/:itemId" component={ItemPage} />
 					<Route exact path="/:tab(other)" component={OtherPage} />
 					<Route exact path="/:tab(other)/person" component={PersonsPage} />
+					<Route exact path="/:tab(other)/tag" component={TagsPage} />
 					<Route exact path="/" render={() => <Redirect to="/list" />} />
 				</IonRouterOutlet>
 				<IonTabBar slot="bottom">

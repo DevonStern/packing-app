@@ -1,7 +1,7 @@
 import { IonBackButton, IonButtons, IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
-import PersonsView from './PersonsView';
+import TagsView from './TagsView';
 
-const PersonsPage: React.FC = () => {
+const TagsPage: React.FC = () => {
 	return (
 		<IonPage>
 			<IonHeader>
@@ -9,7 +9,7 @@ const PersonsPage: React.FC = () => {
 					<IonButtons slot="start">
 						<IonBackButton />
 					</IonButtons>
-					<IonTitle>People</IonTitle>
+					<IonTitle>Tags</IonTitle>
 				</IonToolbar>
 			</IonHeader>
 			<IonContent fullscreen>
@@ -18,13 +18,13 @@ const PersonsPage: React.FC = () => {
 						<IonButtons slot="start">
 							<IonBackButton />
 						</IonButtons>
-						<IonTitle size="large">People</IonTitle>
+						<IonTitle size="large">Tags</IonTitle>
 					</IonToolbar>
 				</IonHeader>
-				<PersonsView />
+				<TagsView />
 			</IonContent>
 		</IonPage>
 	)
 }
 
-export default PersonsPage
+export default TagsPage

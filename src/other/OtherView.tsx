@@ -11,6 +11,7 @@ const OtherView: React.FC = () => {
 	return (
 		<IonList>
 			<IonItem onClick={() => goToPage('person')}>People</IonItem>
+			<IonItem onClick={() => goToPage('tag')}>Tags</IonItem>
 		</IonList>
 	)
 }
