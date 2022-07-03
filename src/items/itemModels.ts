@@ -1,5 +1,6 @@
 import { v4 as uuid } from "uuid";
 import { Person } from "../persons/personModel";
+import { Tag } from "../tags/tagModel";
 
 export interface Item {
 	id: string
@@ -8,7 +9,7 @@ export interface Item {
 	name: string
 	persons: ItemPerson[]
 	state: ItemState
-	tags: string[]
+	tags: Tag[]
 }
 
 export enum ItemState {
@@ -37,7 +38,7 @@ export const itemsRestorer = (savedItems: any): Item[] => {
 	const items: Item[] = savedItems.map((item: Item) => {
 		const state: ItemState = item.state ?? DEFAULT_ITEM_STATE
 		const persons: ItemPerson[] = item.persons ?? []
-		const tags: string[] = item.tags ?? []
+		const tags: Tag[] = item.tags ?? []
 		const updatedItem: Item = {
 			...item,
 			state,

@@ -1,6 +1,7 @@
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil"
 import { List, listsState, masterListState } from "../lists/listModels"
 import { Person, personsState } from "../persons/personModel"
+import { Tag, tagsState } from "../tags/tagModel"
 import { getItemPersonWithNextState } from "../utils/itemStateUtils"
 import { DEFAULT_ITEM_STATE, Item, ItemPerson, ItemState, makeItem } from "./itemModels"
 import useItemUpdates from "./useItemUpdates"
@@ -9,6 +10,7 @@ const useListItems = (list: List) => {
 	const setLists = useSetRecoilState(listsState)
 	const [masterList, setMasterList] = useRecoilState(masterListState)
 	const persons = useRecoilValue(personsState)
+	const tags = useRecoilValue(tagsState)
 
 	const { getItemWithOverriddenPropIfNeeded } = useItemUpdates()
 
@@ -230,6 +232,20 @@ const useListItems = (list: List) => {
 		}
 	}
 
+	const updateTagsOnItems = (selectedItems: Item[], tagIds: string[]) => {
+		const updatedTags: Tag[] = tags.filter(t => tagIds.some(id => id === t.id))
+		setSelectedItems(selectedItems, updatedTags, getItemWithUpdatedTags)
+	}
+
+	const getItemWithUpdatedTags = (item: Item, tags: Tag[]): Item => {
+		const itemWithOverriddenProp: Item = getItemWithOverriddenPropIfNeeded(list, item, 'tags')
+		const updatedItem: Item = {
+			...itemWithOverriddenProp,
+			tags,
+		}
+		return updatedItem
+	}
+
 	const updateItemName = (item: Item, name: string) => {
 		const itemWithOverriddenProp: Item = getItemWithOverriddenPropIfNeeded(list, item, 'name')
 		const updatedItem: Item = {
@@ -262,6 +278,7 @@ const useListItems = (list: List) => {
 		deleteItem,
 		updateItemStateOnItems,
 		updateItemPersonsOnItems,
+		updateTagsOnItems,
 		updateItemName,
 		advanceItemPersonState,
 	}

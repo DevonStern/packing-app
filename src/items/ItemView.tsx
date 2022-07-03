@@ -9,6 +9,8 @@ import ItemPersonRow from "./ItemPersonRow"
 import MoveItemStateButton from "./MoveItemStateButton"
 import useItemState from "./useItemState"
 import ItemStateChip from "./ItemStateChip"
+import { tagsState } from "../tags/tagModel"
+import TagSelect from "../tags/TagSelect"
 
 interface ItemViewProps {
 	list: List
@@ -17,6 +19,7 @@ interface ItemViewProps {
 
 const ItemView: React.FC<ItemViewProps> = ({ list, item }) => {
 	const persons = useRecoilValue(personsState)
+	const tags = useRecoilValue(tagsState)
 
 	const { hasPersons, lowestItemState, stateText } = useItemInfo(item)
 	const { moveWholeState } = useItemState(list, item)
@@ -24,6 +27,12 @@ const ItemView: React.FC<ItemViewProps> = ({ list, item }) => {
 	return (
 		<>
 			<IonList>
+				{tags.length > 0 ? (
+					<IonItem>
+						<IonLabel>Tags</IonLabel>
+						<TagSelect list={list} selectedItems={[item]} />
+					</IonItem>
+				) : null}
 				{persons.length > 0 ? (
 					<IonItem>
 						<IonLabel>People</IonLabel>
