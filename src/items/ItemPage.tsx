@@ -88,6 +88,11 @@ const ItemNameInput: React.FC<ItemNameInputProps> = ({ list, item, setIsEditingN
 	const inputRef = useRef<HTMLIonInputElement | null>(null)
 	useInputFocus(inputRef)
 
+	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault()
+		submitName()
+	}
+
 	const submitName = () => {
 		if (!name.trim()) {
 			setName(item.name)
@@ -98,11 +103,13 @@ const ItemNameInput: React.FC<ItemNameInputProps> = ({ list, item, setIsEditingN
 	}
 
 	return (
-		<IonInput
-			ref={inputRef}
-			value={name}
-			onIonChange={event => setName(event.detail.value ?? '')}
-			onIonBlur={submitName}
-		/>
+		<form onSubmit={handleSubmit}>
+			<IonInput
+				ref={inputRef}
+				value={name}
+				onIonChange={event => setName(event.detail.value ?? '')}
+				onIonBlur={submitName}
+			/>
+		</form>
 	)
 }
