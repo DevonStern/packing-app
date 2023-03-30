@@ -59,7 +59,7 @@ const MultiSelectActions: React.FC<MultiSelectActionsProps> = ({ list }) => {
 			</IonFab>
 			<div style={{ display: 'none' }}>
 				<PersonSelect list={list} selectedItems={selectedItems} openSelect={openPersonSelect} />
-				<TagSelect list={list} selectedItems={selectedItems} openSelect={openTagSelect} />
+				<TagSelect list={list} selectedItems={selectedItems} openSelect={openTagSelect} isAdditive={true} />
 				<ItemStateSelect list={list} selectedItems={selectedItems} openSelect={openItemStateSelect} />
 			</div>
 		</>

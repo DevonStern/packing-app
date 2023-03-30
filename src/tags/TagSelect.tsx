@@ -10,9 +10,10 @@ interface TagSelectProps {
 	list: List
 	selectedItems: Item[]
 	openSelect?: boolean
+	isAdditive?: boolean
 }
 
-const TagSelect: React.FC<TagSelectProps> = ({ list, selectedItems, openSelect }) => {
+const TagSelect: React.FC<TagSelectProps> = ({ list, selectedItems, openSelect, isAdditive }) => {
 	const tags = useRecoilValue(tagsState)
 
 	const defaultValue: string[] = selectedItems.length === 1 ?
@@ -21,7 +22,7 @@ const TagSelect: React.FC<TagSelectProps> = ({ list, selectedItems, openSelect }
 	const [ids, setIds] = useState<string[]>(defaultValue)
 	const [wasCancelled, setWasCancelled] = useState<boolean>(false)
 
-	const { updateTagsOnItems } = useListItems(list)
+	const { updateTagsOnItems, addTagsOnItems } = useListItems(list)
 	const selectRef = useRef<HTMLIonSelectElement | null>(null)
 
 	useEffect(() => {
@@ -41,7 +42,11 @@ const TagSelect: React.FC<TagSelectProps> = ({ list, selectedItems, openSelect }
 
 	const handleDismiss = () => {
 		if (!wasCancelled) {
-			updateTagsOnItems(selectedItems, ids)
+			if (isAdditive) {
+				addTagsOnItems(selectedItems, ids)
+			} else {
+				updateTagsOnItems(selectedItems, ids)
+			}
 			setWasCancelled(false)
 		}
 	}

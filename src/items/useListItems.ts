@@ -246,6 +246,24 @@ const useListItems = (list: List) => {
 		return updatedItem
 	}
 
+	const addTagsOnItems = (selectedItems: Item[], tagIds: string[]) => {
+		const addedTags: Tag[] = tags.filter(t => tagIds.some(id => id === t.id))
+		setSelectedItems(selectedItems, addedTags, getItemWithAddedTags)
+	}
+
+	const getItemWithAddedTags = (item: Item, tags: Tag[]): Item => {
+		const itemWithOverriddenProp: Item = getItemWithOverriddenPropIfNeeded(list, item, 'tags')
+		const newTags: Tag[] = tags.filter(t => !item.tags.some(it => it.id === t.id))
+		const updatedItem: Item = {
+			...itemWithOverriddenProp,
+			tags: [
+				...item.tags,
+				...newTags,
+			],
+		}
+		return updatedItem
+	}
+
 	const updateItemName = (item: Item, name: string) => {
 		const itemWithOverriddenProp: Item = getItemWithOverriddenPropIfNeeded(list, item, 'name')
 		const updatedItem: Item = {
@@ -279,6 +297,7 @@ const useListItems = (list: List) => {
 		updateItemStateOnItems,
 		updateItemPersonsOnItems,
 		updateTagsOnItems,
+		addTagsOnItems,
 		updateItemName,
 		advanceItemPersonState,
 	}
