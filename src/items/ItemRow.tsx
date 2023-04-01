@@ -14,7 +14,7 @@ interface ItemRowProps {
 
 const ItemRow: React.FC<ItemRowProps> = ({ list, item }) => {
 	const history = useHistory()
-	const { deleteItem } = useListItems(list)
+	const { advanceItemPersonState, deleteItem } = useListItems(list)
 	const { moveWholeState } = useItemState(list, item)
 
 	const goToItem = () => {
@@ -39,7 +39,13 @@ const ItemRow: React.FC<ItemRowProps> = ({ list, item }) => {
 						<IonBadge
 							key={ip.person.id}
 							mode="ios"
-							color={ip.state === ItemState.LOADED ? 'success' : 'secondary'}
+							color={ip.state === ItemState.LOADED ? 'success' : (
+								ip.state === ItemState.PACKED ? 'tertiary' : 'secondary'
+							)}
+							onClick={(event) => {
+								advanceItemPersonState(item, ip)
+								event.stopPropagation()
+							}}
 						>
 							{ip.person.name.slice(0, 1)}
 						</IonBadge>
