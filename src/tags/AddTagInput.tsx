@@ -6,8 +6,10 @@ const AddTagInput: React.FC = () => {
 	const setTags = useSetRecoilState(tagsState)
 
 	const addTag = (name: string) => {
-		const newTag: Tag = makeTag(name)
-		setTags(oldTags => [ ...oldTags, newTag ])
+		setTags(oldTags => [
+			...oldTags,
+			makeTag(name, oldTags.length),
+		])
 	}
 
 	return (

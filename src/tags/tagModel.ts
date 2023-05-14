@@ -2,28 +2,30 @@ import { AtomEffect, DefaultValue, atom } from "recoil";
 import { v4 as uuid } from "uuid";
 import { makePersistenceEffect } from "../utils/persistenceUtils";
 import { markDeletedInDynamoDb, putInDynamoDb } from "../utils/serverUtils";
-import { Created, WithId } from "../constants/modelConstants";
+import { Created, Sortable, WithId } from "../constants/modelConstants";
 import { logChangesToStoredData } from "../flags";
 import { Storage } from "@capacitor/storage";
 
 const STORAGE_KEY_TAGS = 'tags'
 const TABLE_TAGS = 'Tag'
 
-export interface Tag extends WithId, Created {
+export interface Tag extends WithId, Created, Sortable {
 	name: string
 }
 
-export const makeTag = (name: string): Tag => ({
+export const makeTag = (name: string, sortOrder: number): Tag => ({
 	id: uuid(),
 	name,
 	createdOn: new Date(),
+	sortOrder,
 })
 
 const tagsRestorer = (savedTags: any[]): Tag[] => {
-	const tags: Tag[] = savedTags.map<Tag>((tag: Tag) => {
+	const tags: Tag[] = savedTags.map<Tag>((tag: Tag, i: number) => {
 		return {
 			...tag,
 			createdOn: new Date(tag.createdOn) ?? new Date(),
+			sortOrder: tag.sortOrder ?? i,
 		}
 	})
 	return tags

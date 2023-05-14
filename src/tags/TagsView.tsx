@@ -13,7 +13,17 @@ const TagsView: React.FC = () => {
 	const [isAddInputOpen, setIsAddInputOpen] = useState<boolean>(false)
 
 	const deleteTag = (id: string) => {
-		setTags((oldTags) => oldTags.filter(t => t.id !== id))
+		setTags((oldTags) => {
+			const index = oldTags.findIndex(t => t.id === id)
+			if (index === -1) {
+				throw new Error(`Could not find tag to delete: id = ${id}`)
+			}
+			return [
+				...oldTags.slice(0, index),
+				...oldTags.slice(index + 1)
+					.map(t => ({ ...t, sortOrder: t.sortOrder - 1 })) // Adjust sort orders down
+			]
+		})
 	}
 
 	return (
