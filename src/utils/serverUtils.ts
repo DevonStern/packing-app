@@ -1,7 +1,7 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
 import { CreatedUpdated, Deletable, ServerObj, WithId } from '../constants/modelConstants'
-import { getSyncedOn } from '../sync/sync'
+import { getSyncedOn } from '../sync/useSync'
 
 const getClient = () => {
 	const client = new DynamoDBClient({
