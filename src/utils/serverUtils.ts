@@ -1,6 +1,6 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
-import { Created, Deletable, ServerObj, WithId } from '../constants/modelConstants'
+import { CreatedUpdated, Deletable, ServerObj, WithId } from '../constants/modelConstants'
 
 const getClient = () => {
 	const client = new DynamoDBClient({
@@ -26,13 +26,14 @@ export const scanInDynamoDb = async (table: string) => {
 	}
 }
 
-export const putInDynamoDb = async <T extends WithId & Created>(table: string, item: T) => {
+export const putInDynamoDb = async <T extends WithId & CreatedUpdated>(table: string, item: T) => {
 	try {
 		const client = getClient()
-		const newItem: Omit<T, keyof Created> & ServerObj = {
+		const newItem: Omit<T, keyof CreatedUpdated> & ServerObj = {
 			...item,
 			serverUpdatedOn: new Date().toISOString(),
 			createdOn: item.createdOn.toISOString(),
+			updatedOn: item.updatedOn.toISOString(),
 		}
 		const results = await client.put({
 			TableName: table,
@@ -53,13 +54,14 @@ export const batchPutInDynamoDb = async () => {
 
 }
 
-export const markDeletedInDynamoDb = async <T extends WithId & Created>(table: string, item: T) => {
+export const markDeletedInDynamoDb = async <T extends WithId & CreatedUpdated>(table: string, item: T) => {
 	try {
 		const client = getClient()
-		const newItem: Omit<T, keyof Created> & ServerObj & Deletable = {
+		const newItem: Omit<T, keyof CreatedUpdated> & ServerObj & Deletable = {
 			...item,
 			serverUpdatedOn: new Date().toISOString(),
 			createdOn: item.createdOn.toISOString(),
+			updatedOn: new Date().toISOString(), //Since there isn't a new item that has the current updatedOn
 			deleted: true,
 		}
 		const results = await client.put({

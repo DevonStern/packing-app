@@ -1,1 +1,2 @@
-export const logChangesToStoredData: boolean = false
+export const logChangesToStoredData = false
+export const logChangesToServerData = false

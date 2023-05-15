@@ -5,14 +5,16 @@ export interface WithId {
 export interface ServerObj {
 	serverUpdatedOn: string
 	createdOn: string
+	updatedOn: string
 }
 
 export interface Deletable {
 	deleted?: boolean
 }
 
-export interface Created {
+export interface CreatedUpdated {
 	createdOn: Date
+	updatedOn: Date
 }
 
 export interface Sortable {

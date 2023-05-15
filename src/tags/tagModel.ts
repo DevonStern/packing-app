@@ -2,14 +2,14 @@ import { AtomEffect, DefaultValue, atom } from "recoil";
 import { v4 as uuid } from "uuid";
 import { makePersistenceEffect } from "../utils/persistenceUtils";
 import { markDeletedInDynamoDb, putInDynamoDb } from "../utils/serverUtils";
-import { Created, Sortable, WithId } from "../constants/modelConstants";
-import { logChangesToStoredData } from "../flags";
+import { CreatedUpdated, Sortable, WithId } from "../constants/modelConstants";
+import { logChangesToServerData, logChangesToStoredData } from "../flags";
 import { Storage } from "@capacitor/storage";
 
 const STORAGE_KEY_TAGS = 'tags'
 const TABLE_TAGS = 'Tag'
 
-export interface Tag extends WithId, Created, Sortable {
+export interface Tag extends WithId, CreatedUpdated, Sortable {
 	name: string
 }
 
@@ -17,14 +17,17 @@ export const makeTag = (name: string, sortOrder: number): Tag => ({
 	id: uuid(),
 	name,
 	createdOn: new Date(),
+	updatedOn: new Date(),
 	sortOrder,
 })
 
 const tagsRestorer = (savedTags: any[]): Tag[] => {
-	const tags: Tag[] = savedTags.map<Tag>((tag: Tag, i: number) => {
+	const tags: Tag[] = savedTags.map<Tag>((tag: Partial<Tag>, i: number) => {
 		return {
-			...tag,
-			createdOn: new Date(tag.createdOn) ?? new Date(),
+			id: tag.id!,
+			name: tag.name!,
+			createdOn: tag.createdOn ? new Date(tag.createdOn) : new Date(),
+			updatedOn: tag.updatedOn ? new Date(tag.updatedOn) : new Date(),
 			sortOrder: tag.sortOrder ?? i,
 		}
 	})
@@ -60,7 +63,7 @@ const tagsServerOnSetEffect = (newValues: Tag[], oldValues: Tag[] | DefaultValue
 		const changedOrAdded: boolean = !o || JSON.stringify(o) !== JSON.stringify(n)
 		return changedOrAdded
 	})
-	console.debug('changedOrAddedValues', changedOrAddedValues)
+	if (logChangesToServerData) console.log('saving changed or added values to server', changedOrAddedValues)
 	changedOrAddedValues.forEach((value) => putInDynamoDb(TABLE_TAGS, value))
 
 	const deletedValues = oldValues.filter(o => {
@@ -68,7 +71,7 @@ const tagsServerOnSetEffect = (newValues: Tag[], oldValues: Tag[] | DefaultValue
 		const deleted: boolean = !n
 		return deleted
 	})
-	console.debug('deletedValues', deletedValues)
+	if (logChangesToServerData) console.log('saving deleted values to server', deletedValues)
 	deletedValues.forEach((value) => markDeletedInDynamoDb(TABLE_TAGS, value))
 }
 

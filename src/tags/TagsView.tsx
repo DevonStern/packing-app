@@ -21,7 +21,7 @@ const TagsView: React.FC = () => {
 			return [
 				...oldTags.slice(0, index),
 				...oldTags.slice(index + 1)
-					.map(t => ({ ...t, sortOrder: t.sortOrder - 1 })) // Adjust sort orders down
+					.map(t => ({ ...t, sortOrder: t.sortOrder - 1 })), // Adjust sort orders down
 			]
 		})
 	}
