@@ -2,6 +2,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
 import { CreatedUpdated, Deletable, ServerObj, WithId } from '../constants/modelConstants'
 import { getSyncedOn } from '../sync/useSync'
+import { parseTags } from '../tags/tagModel'
 
 const getClient = () => {
 	const client = new DynamoDBClient({
@@ -23,8 +24,9 @@ export const scanInDynamoDb = async <T>(table: string, filterExpression?: string
 			FilterExpression: filterExpression,
 			ExpressionAttributeValues: expressionAttributeValues,
 		})
-		console.log('scanned in DynamoDB', results.Items)
-		return results.Items as T[] ?? []
+		const parsed = parseTags(results.Items ?? [])
+		console.log('scanned in DynamoDB', parsed)
+		return parsed as any[]
 	} catch (error) {
 		console.error('Failed to scan items from DynamoDB', error)
 		throw error
@@ -35,8 +37,12 @@ export const getChangesFromDynamoDb = async <T>(table: string): Promise<T[]> => 
 	const syncedOn: Date = await getSyncedOn()
 	const expressionAttributeValues = {
 		":so": syncedOn.toISOString(),
+		":true": true,
 	}
-	const filterExpression = `serverUpdatedOn > :so`
+	const filterExpression = `
+		serverUpdatedOn > :so
+		AND NOT deleted = :true
+	`
 	return scanInDynamoDb(table, filterExpression, expressionAttributeValues)
 }
 

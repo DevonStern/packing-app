@@ -18,22 +18,45 @@ export const setSyncedOnNow = async () => {
 }
 
 const useSync = () => {
-	const [tags, setTags] = useRecoilState(tagsState)
+	const [oldTags, setTags] = useRecoilState(tagsState)
 
 	const sync = async () => {
+		const tags = oldTags
+		// setTags(tags => {
+			
+		// })
 		const changes: Tag[] = await getChangesFromDynamoDb<Tag>('Tag')
-		const mergedChanges: Tag[] = mergeChanges(changes)
-		console.debug('test', mergedChanges)
+		const mergedValues: Tag[] = mergeChanges(tags, changes)
+		// console.debug('merged', mergedValues)
+		const sortedValues: Tag[] = sortBySortOrder(mergedValues)
+		console.debug('sorted', sortedValues)
 	}
 
-	const mergeChanges = (changes: Tag[]): Tag[] => {
-		return changes.map(change => {
-			const existing = tags.find(t => t.id === change.id)
+	const mergeChanges = (oldValues: Tag[], changes: Tag[]): Tag[] => {
+		const updatedExisting: Tag[] = oldValues.map(oldValue => {
+			const changed = changes.find(c => c.id === oldValue.id)
 
-			if (!existing) return change
-			if (existing.updatedOn > change.updatedOn) return existing
-			return change
+			if (!changed) return oldValue
+			if (changed.updatedOn > oldValue.updatedOn) return changed
+			return oldValue
 		})
+		const added: Tag[] = changes.filter(c => !oldValues.find(v => v.id === c.id))
+
+		return [
+			...updatedExisting,
+			...added,
+		]
+	}
+
+	const sortBySortOrder = (array: Tag[]): Tag[] => {
+		const sorted = [...array].sort((a: Tag, b: Tag) => {
+			if (a.sortOrder === b.sortOrder) {
+				return a.createdOn < b.createdOn ? -1 : 1
+			}
+			return a.sortOrder - b.sortOrder
+		})
+		const updatedSortOrder = sorted.map((v, i) => ({ ...v, sortOrder: i }))
+		return updatedSortOrder
 	}
 
 	return {

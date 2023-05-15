@@ -21,17 +21,14 @@ export const makeTag = (name: string, sortOrder: number): Tag => ({
 	sortOrder,
 })
 
-const tagsRestorer = (savedTags: any[]): Tag[] => {
-	const tags: Tag[] = savedTags.map<Tag>((tag: Partial<Tag>, i: number) => {
-		return {
-			id: tag.id!,
-			name: tag.name!,
-			createdOn: tag.createdOn ? new Date(tag.createdOn) : new Date(),
-			updatedOn: tag.updatedOn ? new Date(tag.updatedOn) : new Date(),
-			sortOrder: tag.sortOrder ?? i,
-		}
-	})
-	return tags
+export const parseTags = (tags: Partial<Tag>[]): Tag[] => {
+	return tags.map<Tag>((tag, i) => ({
+		id: tag.id!,
+		name: tag.name!,
+		createdOn: tag.createdOn ? new Date(tag.createdOn) : new Date(),
+		updatedOn: tag.updatedOn ? new Date(tag.updatedOn) : new Date(),
+		sortOrder: tag.sortOrder ?? i,
+	}))
 }
 
 const tagsPersistenceInitEffect = (setSelf: (value: Promise<Tag[] | DefaultValue>) => void) => {
@@ -39,11 +36,17 @@ const tagsPersistenceInitEffect = (setSelf: (value: Promise<Tag[] | DefaultValue
 		Storage.get({ key: STORAGE_KEY_TAGS })
 			.then(({ value }) => {
 				if (!value) return new DefaultValue()
-				const restoredValue: Tag[] = tagsRestorer(JSON.parse(value))
+				const restoredValue: Tag[] = parseTags(JSON.parse(value))
 				if (logChangesToStoredData) console.log('restored from local storage', restoredValue)
 				return restoredValue
 			})
 	)
+}
+
+const tagsServerInitEffect = (setSelf: (value: Promise<Tag[] | DefaultValue>) => void) => {
+	// setSelf(
+
+	// )
 }
 
 const tagsPersistenceOnSetEffect = (newValue: Tag[]) => {
