@@ -1,4 +1,4 @@
-import { AtomEffect, DefaultValue, atom } from "recoil";
+import { AtomEffect, DefaultValue, RecoilValue, atom } from "recoil";
 import { v4 as uuid } from "uuid";
 import { makePersistenceEffect } from "../utils/persistenceUtils";
 import { markDeletedInDynamoDb, putInDynamoDb } from "../utils/serverUtils";
@@ -54,40 +54,63 @@ const tagsPersistenceOnSetEffect = (newValue: Tag[]) => {
 	Storage.set({ key: STORAGE_KEY_TAGS, value: JSON.stringify(newValue) })
 }
 
-const tagsServerOnSetEffect = (newValues: Tag[], oldValues: Tag[] | DefaultValue) => {
-	if (oldValues instanceof DefaultValue) {
-		console.debug('DefaultValue')
-		//TODO: scan and see if any of the new values need to be uploaded (don't exist on server, were changed locally more recently, etc.)
-		return
+export const fetchedTagsState = atom<Tag[]>({
+	key: 'fetchedTagsState',
+	default: [],
+})
+
+const tagsServerOnSetEffect = (getPromise: <S>(recoilValue: RecoilValue<S>) => Promise<S>) => {
+	return (newValues: Tag[], oldValues: Tag[] | DefaultValue) => {
+		if (oldValues instanceof DefaultValue) {
+			console.debug('DefaultValue')
+			//TODO: scan and see if any of the new values need to be uploaded (don't exist on server, were changed locally more recently, etc.)
+			return
+		}
+
+		getPromise(fetchedTagsState).then(fetchedValues => {
+			const changedOrAddedValues: Tag[] = newValues.filter(n => {
+				const o = oldValues.find(possibleMatch => possibleMatch.id === n.id)
+				const changedOrAdded: boolean = !o || JSON.stringify(o) !== JSON.stringify(n)
+				return changedOrAdded
+			})
+			console.debug('before comparing changed to fetched', changedOrAddedValues)
+			// Prevent sending to server when it was just fetched from server
+			const differentFromServer = changedOrAddedValues.filter(newValue => {
+				const fetched = fetchedValues.find(possibleMatch => possibleMatch.id === newValue.id)
+				const differentFromServer: boolean = !fetched || JSON.stringify(fetched) !== JSON.stringify(newValue)
+				return differentFromServer
+			})
+			if (logChangesToServerData) console.log('saving changed or added values to server', differentFromServer)
+			differentFromServer.forEach((value) => putInDynamoDb(TABLE_TAGS, value))
+
+			const deletedValues = oldValues.filter(o => {
+				const n = newValues.find(possibleMatch => possibleMatch.id === o.id)
+				const deleted: boolean = !n
+				return deleted
+			})
+			console.debug('before comparing deleted to fetched', deletedValues)
+			// Prevent sending to server when it was just fetched from server
+			const notDeletedOnServer = deletedValues.filter(oldValue => {
+				const fetched = fetchedValues.find(possibleMatch => possibleMatch.id === oldValue.id)
+				const notDeletedOnServer: boolean = !fetched || !fetched.hasOwnProperty('deleted')
+				return notDeletedOnServer
+			})
+			if (logChangesToServerData) console.log('saving deleted values to server', notDeletedOnServer)
+			notDeletedOnServer.forEach((value) => markDeletedInDynamoDb(TABLE_TAGS, value))
+		})
 	}
-
-	const changedOrAddedValues: Tag[] = newValues.filter(n => {
-		const o = oldValues.find(possibleMatch => possibleMatch.id === n.id)
-		const changedOrAdded: boolean = !o || JSON.stringify(o) !== JSON.stringify(n)
-		return changedOrAdded
-	})
-	if (logChangesToServerData) console.log('saving changed or added values to server', changedOrAddedValues)
-	changedOrAddedValues.forEach((value) => putInDynamoDb(TABLE_TAGS, value))
-
-	const deletedValues = oldValues.filter(o => {
-		const n = newValues.find(possibleMatch => possibleMatch.id === o.id)
-		const deleted: boolean = !n
-		return deleted
-	})
-	if (logChangesToServerData) console.log('saving deleted values to server', deletedValues)
-	deletedValues.forEach((value) => markDeletedInDynamoDb(TABLE_TAGS, value))
 }
 
 /**
  * These effects need to be combined into a single effect so onSet doesn't get called
  * when setSelf gets called. That only works for the setSelf within the same effect.
  */
-const tagsEffect: AtomEffect<Tag[]> = ({ setSelf, onSet }) => {
+const tagsEffect: AtomEffect<Tag[]> = ({ setSelf, onSet, getPromise }) => {
 	tagsPersistenceInitEffect(setSelf)
 	//TODO: init from server
 
 	// onSet(tagsPersistenceOnSetEffect)
-	// onSet(tagsServerOnSetEffect(getPromise))
+	onSet(tagsServerOnSetEffect(getPromise))
 }
 
 export const tagsState = atom<Tag[]>({

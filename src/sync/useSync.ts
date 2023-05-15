@@ -1,6 +1,6 @@
 import { Storage } from "@capacitor/storage";
 import { getChangesFromDynamoDb } from "../utils/serverUtils";
-import { Tag, tagsState } from "../tags/tagModel";
+import { Tag, fetchedTagsState, tagsState } from "../tags/tagModel";
 import { useSetRecoilState } from "recoil";
 
 const STORAGE_KEY_SYNC = 'sync'
@@ -19,9 +19,11 @@ export const setSyncedOnNow = async () => {
 
 const useSync = () => {
 	const setTags = useSetRecoilState(tagsState)
+	const setFetchedTags = useSetRecoilState(fetchedTagsState)
 
 	const sync = async () => {
 		const changes = await getChangesFromDynamoDb<Tag>('Tag')
+		setFetchedTags(changes)
 		setTags(tags => {
 			const deletedRemoved: Tag[] = tags.filter(t => !changes.find(change => change.id === t.id && change.deleted))
 			console.debug('deleted removed', deletedRemoved)
