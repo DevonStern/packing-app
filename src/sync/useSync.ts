@@ -1,7 +1,7 @@
 import { Storage } from "@capacitor/storage";
 import { getChangesFromDynamoDb } from "../utils/serverUtils";
 import { Tag, tagsState } from "../tags/tagModel";
-import { useRecoilState } from "recoil";
+import { useSetRecoilState } from "recoil";
 
 const STORAGE_KEY_SYNC = 'sync'
 
@@ -18,18 +18,21 @@ export const setSyncedOnNow = async () => {
 }
 
 const useSync = () => {
-	const [oldTags, setTags] = useRecoilState(tagsState)
+	const setTags = useSetRecoilState(tagsState)
 
 	const sync = async () => {
-		const tags = oldTags
-		// setTags(tags => {
-			
-		// })
-		const changes: Tag[] = await getChangesFromDynamoDb<Tag>('Tag')
-		const mergedValues: Tag[] = mergeChanges(tags, changes)
-		// console.debug('merged', mergedValues)
-		const sortedValues: Tag[] = sortBySortOrder(mergedValues)
-		console.debug('sorted', sortedValues)
+		const changes = await getChangesFromDynamoDb<Tag>('Tag')
+		setTags(tags => {
+			const deletedRemoved: Tag[] = tags.filter(t => !changes.find(change => change.id === t.id && change.deleted))
+			console.debug('deleted removed', deletedRemoved)
+			const changesWithoutDeleted: Tag[] = changes.filter(c => !c.deleted)
+			console.debug('changes without deleted', changesWithoutDeleted)
+			const mergedValues = mergeChanges(deletedRemoved, changesWithoutDeleted)
+			console.debug('merged', mergedValues)
+			const sortedValues = sortBySortOrder(mergedValues)
+			console.debug('sorted', sortedValues)
+			return sortedValues
+		})
 	}
 
 	const mergeChanges = (oldValues: Tag[], changes: Tag[]): Tag[] => {

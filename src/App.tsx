@@ -36,41 +36,48 @@ import PersonsPage from './persons/PersonsPage';
 import ItemPage from './items/ItemPage';
 import OtherPage from './other/OtherPage';
 import TagsPage from './tags/TagsPage';
+import { useRecoilValue } from 'recoil';
+import { tagsState } from './tags/tagModel';
 
 setupIonicReact();
 
-const App: React.FC = () => (
-	<IonApp>
-		<IonReactRouter>
-			<IonTabs>
-				<IonRouterOutlet>
-					<Route exact path="/:tab(masterList)/:listId" component={ListPage} />
-					<Route exact path="/:tab(masterList)/:listId/item/:itemId" component={ItemPage} />
-					<Route exact path="/:tab(list)" component={ListSelectionPage} />
-					<Route exact path="/:tab(list)/:listId" component={ListPage} />
-					<Route exact path="/:tab(list)/:listId/item/:itemId" component={ItemPage} />
-					<Route exact path="/:tab(other)" component={OtherPage} />
-					<Route exact path="/:tab(other)/person" component={PersonsPage} />
-					<Route exact path="/:tab(other)/tag" component={TagsPage} />
-					<Route exact path="/" render={() => <Redirect to="/list" />} />
-				</IonRouterOutlet>
-				<IonTabBar slot="bottom">
-					<IonTabButton tab="masterList" href="/masterList/masterId">
-						<IonIcon icon={triangle} />
-						<IonLabel>Master List</IonLabel>
-					</IonTabButton>
-					<IonTabButton tab="list" href="/list">
-						<IonIcon icon={ellipse} />
-						<IonLabel>Lists</IonLabel>
-					</IonTabButton>
-					<IonTabButton tab="other" href="/other">
-						<IonIcon icon={person} />
-						<IonLabel>Other</IonLabel>
-					</IonTabButton>
-				</IonTabBar>
-			</IonTabs>
-		</IonReactRouter>
-	</IonApp>
-)
+const App: React.FC = () => {
+	//These are used here to trigger initialization of the state before initial sync
+	useRecoilValue(tagsState)
+
+	return (
+		<IonApp>
+			<IonReactRouter>
+				<IonTabs>
+					<IonRouterOutlet>
+						<Route exact path="/:tab(masterList)/:listId" component={ListPage} />
+						<Route exact path="/:tab(masterList)/:listId/item/:itemId" component={ItemPage} />
+						<Route exact path="/:tab(list)" component={ListSelectionPage} />
+						<Route exact path="/:tab(list)/:listId" component={ListPage} />
+						<Route exact path="/:tab(list)/:listId/item/:itemId" component={ItemPage} />
+						<Route exact path="/:tab(other)" component={OtherPage} />
+						<Route exact path="/:tab(other)/person" component={PersonsPage} />
+						<Route exact path="/:tab(other)/tag" component={TagsPage} />
+						<Route exact path="/" render={() => <Redirect to="/list" />} />
+					</IonRouterOutlet>
+					<IonTabBar slot="bottom">
+						<IonTabButton tab="masterList" href="/masterList/masterId">
+							<IonIcon icon={triangle} />
+							<IonLabel>Master List</IonLabel>
+						</IonTabButton>
+						<IonTabButton tab="list" href="/list">
+							<IonIcon icon={ellipse} />
+							<IonLabel>Lists</IonLabel>
+						</IonTabButton>
+						<IonTabButton tab="other" href="/other">
+							<IonIcon icon={person} />
+							<IonLabel>Other</IonLabel>
+						</IonTabButton>
+					</IonTabBar>
+				</IonTabs>
+			</IonReactRouter>
+		</IonApp>
+	)
+}
 
 export default App

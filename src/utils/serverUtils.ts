@@ -16,7 +16,11 @@ const getClient = () => {
 	return docClient
 }
 
-export const scanInDynamoDb = async <T>(table: string, filterExpression?: string, expressionAttributeValues?: any): Promise<T[]> => {
+export const scanInDynamoDb = async <T>(
+	table: string,
+	filterExpression?: string,
+	expressionAttributeValues?: any,
+): Promise<(T & Deletable)[]> => {
 	const client = getClient()
 	try {
 		const results = await client.scan({
@@ -25,24 +29,29 @@ export const scanInDynamoDb = async <T>(table: string, filterExpression?: string
 			ExpressionAttributeValues: expressionAttributeValues,
 		})
 		const parsed = parseTags(results.Items ?? [])
-		console.log('scanned in DynamoDB', parsed)
-		return parsed as any[]
+			const parsedWithDeleted = parsed.map(tag => {
+				if (results.Items?.find(i => i.id === tag.id && i.deleted)) {
+					return {
+						...tag,
+						deleted: true,
+					}
+				}
+				return tag
+			})
+		console.log('scanned in DynamoDB', parsedWithDeleted)
+		return parsedWithDeleted as any[]
 	} catch (error) {
 		console.error('Failed to scan items from DynamoDB', error)
 		throw error
 	}
 }
 
-export const getChangesFromDynamoDb = async <T>(table: string): Promise<T[]> => {
+export const getChangesFromDynamoDb = async <T>(table: string): Promise<(T & Deletable)[]> => {
 	const syncedOn: Date = await getSyncedOn()
 	const expressionAttributeValues = {
 		":so": syncedOn.toISOString(),
-		":true": true,
 	}
-	const filterExpression = `
-		serverUpdatedOn > :so
-		AND NOT deleted = :true
-	`
+	const filterExpression = `serverUpdatedOn > :so`
 	return scanInDynamoDb(table, filterExpression, expressionAttributeValues)
 }
 

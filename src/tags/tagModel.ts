@@ -86,8 +86,8 @@ const tagsEffect: AtomEffect<Tag[]> = ({ setSelf, onSet }) => {
 	tagsPersistenceInitEffect(setSelf)
 	//TODO: init from server
 
-	onSet(tagsPersistenceOnSetEffect)
-	onSet(tagsServerOnSetEffect)
+	// onSet(tagsPersistenceOnSetEffect)
+	// onSet(tagsServerOnSetEffect(getPromise))
 }
 
 export const tagsState = atom<Tag[]>({
