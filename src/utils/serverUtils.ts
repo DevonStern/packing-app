@@ -1,6 +1,7 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
 import { CreatedUpdated, Deletable, ServerObj, WithId } from '../constants/modelConstants'
+import { getSyncedOn } from '../sync/sync'
 
 const getClient = () => {
 	const client = new DynamoDBClient({
@@ -14,16 +15,29 @@ const getClient = () => {
 	return docClient
 }
 
-export const scanInDynamoDb = async (table: string) => {
+export const scanInDynamoDb = async <T>(table: string, filterExpression?: string, expressionAttributeValues?: any): Promise<T[]> => {
 	const client = getClient()
 	try {
 		const results = await client.scan({
 			TableName: table,
-		});
-		console.log(results.Items);
-	} catch (err) {
-		console.error(err);
+			FilterExpression: filterExpression,
+			ExpressionAttributeValues: expressionAttributeValues,
+		})
+		console.log('scanned in DynamoDB', results.Items)
+		return results.Items as T[] ?? []
+	} catch (error) {
+		console.error('Failed to scan items from DynamoDB', error)
+		throw error
 	}
+}
+
+export const getChangesFromDynamoDb = async <T>(table: string): Promise<T[]> => {
+	const syncedOn: Date = await getSyncedOn()
+	const expressionAttributeValues = {
+		":so": syncedOn.toISOString(),
+	}
+	const filterExpression = `serverUpdatedOn > :so`
+	return scanInDynamoDb(table, filterExpression, expressionAttributeValues)
 }
 
 export const putInDynamoDb = async <T extends WithId & CreatedUpdated>(table: string, item: T) => {
@@ -40,7 +54,7 @@ export const putInDynamoDb = async <T extends WithId & CreatedUpdated>(table: st
 			Item: newItem,
 			// ConditionExpression: 'attribute_not_exists(id)',
 		})
-		console.log(results)
+		console.log('put in DynamoDB', results)
 	} catch (error: any) {
 		// if (error.name === 'ConditionalCheckFailedException') {
 		// 	console.log(`Item already exists`)
@@ -68,7 +82,7 @@ export const markDeletedInDynamoDb = async <T extends WithId & CreatedUpdated>(t
 			TableName: table,
 			Item: newItem,
 		})
-		console.log(results)
+		console.log('marked deleted in DynamoDB', results)
 	} catch (error: any) {
 		console.error(error)
 	}
