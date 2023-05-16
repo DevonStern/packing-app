@@ -106,10 +106,10 @@ const tagsServerOnSetEffect = (getPromise: <S>(recoilValue: RecoilValue<S>) => P
  * when setSelf gets called. That only works for the setSelf within the same effect.
  */
 const tagsEffect: AtomEffect<Tag[]> = ({ setSelf, onSet, getPromise }) => {
-	tagsPersistenceInitEffect(setSelf)
+	tagsPersistenceInitEffect(setSelf) //Initialize from local storage first
 	//TODO: init from server
 
-	// onSet(tagsPersistenceOnSetEffect)
+	onSet(tagsPersistenceOnSetEffect)
 	onSet(tagsServerOnSetEffect(getPromise))
 }
 
@@ -117,7 +117,7 @@ export const tagsState = atom<Tag[]>({
 	key: 'tagsState',
 	default: [],
 	effects: [
-		tagsEffect, //Initialize from local storage first
+		tagsEffect,
 		// makePersistenceEffect(STORAGE_KEY_TAGS, tagsRestorer), //Initialize from local storage first
 	],
 })

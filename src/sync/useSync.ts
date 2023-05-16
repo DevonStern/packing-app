@@ -35,6 +35,7 @@ const useSync = () => {
 			console.debug('sorted', sortedValues)
 			return sortedValues
 		})
+		await setSyncedOnNow()
 	}
 
 	const mergeChanges = (oldValues: Tag[], changes: Tag[]): Tag[] => {
