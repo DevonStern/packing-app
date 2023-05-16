@@ -43,12 +43,6 @@ const tagsPersistenceInitEffect = (setSelf: (value: Promise<Tag[] | DefaultValue
 	)
 }
 
-const tagsServerInitEffect = (setSelf: (value: Promise<Tag[] | DefaultValue>) => void) => {
-	// setSelf(
-
-	// )
-}
-
 const tagsPersistenceOnSetEffect = (newValue: Tag[]) => {
 	if (logChangesToStoredData) console.log('saving changes to state locally', newValue)
 	Storage.set({ key: STORAGE_KEY_TAGS, value: JSON.stringify(newValue) })
@@ -106,8 +100,7 @@ const tagsServerOnSetEffect = (getPromise: <S>(recoilValue: RecoilValue<S>) => P
  * when setSelf gets called. That only works for the setSelf within the same effect.
  */
 const tagsEffect: AtomEffect<Tag[]> = ({ setSelf, onSet, getPromise }) => {
-	tagsPersistenceInitEffect(setSelf) //Initialize from local storage first
-	//TODO: init from server
+	tagsPersistenceInitEffect(setSelf) //Initialize from local storage first - sync will come after
 
 	onSet(tagsPersistenceOnSetEffect)
 	onSet(tagsServerOnSetEffect(getPromise))
@@ -118,6 +111,6 @@ export const tagsState = atom<Tag[]>({
 	default: [],
 	effects: [
 		tagsEffect,
-		// makePersistenceEffect(STORAGE_KEY_TAGS, tagsRestorer), //Initialize from local storage first
+		// makePersistenceEffect(STORAGE_KEY_TAGS, tagsRestorer),
 	],
 })

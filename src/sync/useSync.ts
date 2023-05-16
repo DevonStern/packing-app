@@ -2,6 +2,7 @@ import { Storage } from "@capacitor/storage";
 import { getChangesFromDynamoDb } from "../utils/serverUtils";
 import { Tag, fetchedTagsState, tagsState } from "../tags/tagModel";
 import { useSetRecoilState } from "recoil";
+import { syncFlag } from "../flags";
 
 const STORAGE_KEY_SYNC = 'sync'
 
@@ -22,19 +23,23 @@ const useSync = () => {
 	const setFetchedTags = useSetRecoilState(fetchedTagsState)
 
 	const sync = async () => {
+		if (!syncFlag) return
+
 		const changes = await getChangesFromDynamoDb<Tag>('Tag')
 		setFetchedTags(changes)
-		setTags(tags => {
-			const deletedRemoved: Tag[] = tags.filter(t => !changes.find(change => change.id === t.id && change.deleted))
-			console.debug('deleted removed', deletedRemoved)
-			const changesWithoutDeleted: Tag[] = changes.filter(c => !c.deleted)
-			console.debug('changes without deleted', changesWithoutDeleted)
-			const mergedValues = mergeChanges(deletedRemoved, changesWithoutDeleted)
-			console.debug('merged', mergedValues)
-			const sortedValues = sortBySortOrder(mergedValues)
-			console.debug('sorted', sortedValues)
-			return sortedValues
-		})
+		if (changes.length > 0) {
+			setTags(tags => {
+				const deletedRemoved: Tag[] = tags.filter(t => !changes.find(change => change.id === t.id && change.deleted))
+				console.debug('deleted removed', deletedRemoved)
+				const changesWithoutDeleted: Tag[] = changes.filter(c => !c.deleted)
+				console.debug('changes without deleted', changesWithoutDeleted)
+				const mergedValues = mergeChanges(deletedRemoved, changesWithoutDeleted)
+				console.debug('merged', mergedValues)
+				const sortedValues = sortBySortOrder(mergedValues)
+				console.debug('sorted', sortedValues)
+				return sortedValues
+			})
+		}
 		await setSyncedOnNow()
 	}
 

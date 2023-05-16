@@ -38,6 +38,7 @@ import OtherPage from './other/OtherPage';
 import TagsPage from './tags/TagsPage';
 import { useRecoilValue } from 'recoil';
 import { tagsState } from './tags/tagModel';
+import usePollForChanges from './sync/usePollForChanges';
 
 setupIonicReact();
 
@@ -45,6 +46,8 @@ const App: React.FC = () => {
 	//These are used here to trigger initialization of the state before initial sync
 	useRecoilValue(tagsState)
 
+	usePollForChanges()
+	
 	return (
 		<IonApp>
 			<IonReactRouter>
