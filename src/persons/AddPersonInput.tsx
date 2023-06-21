@@ -1,17 +1,15 @@
-import { useRecoilState } from "recoil"
+import { useSetRecoilState } from "recoil"
 import AddObjectInput from "../general/AddObjectInput"
-import { makePerson, Person, personsState } from "./personModel"
+import { makePerson, personsState } from "./personModel"
 
 const AddPersonInput: React.FC = () => {
-	const [persons, setPersons] = useRecoilState(personsState)
+	const setPersons = useSetRecoilState(personsState)
 
 	const addPerson = (name: string) => {
-		const newPerson: Person = makePerson(name)
-		const newPersons: Person[] = [
-			...persons,
-			newPerson
-		]
-		setPersons(newPersons)
+		setPersons((oldPersons) => [
+			...oldPersons,
+			makePerson(name, oldPersons.length),
+		])
 	}
 
 	return (

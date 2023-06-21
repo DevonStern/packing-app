@@ -1,6 +1,6 @@
 import { useSetRecoilState } from "recoil"
 import AddObjectInput from "../general/AddObjectInput"
-import { makeTag, Tag, tagsState } from "./tagModel"
+import { makeTag, tagsState } from "./tagModel"
 
 const AddTagInput: React.FC = () => {
 	const setTags = useSetRecoilState(tagsState)
