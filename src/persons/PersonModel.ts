@@ -7,7 +7,7 @@ import { logChangesToServerData, logChangesToStoredData } from "../flags";
 import { markDeletedInDynamoDb, putInDynamoDb } from "../utils/serverUtils";
 
 const STORAGE_KEY_PERSONS = 'persons'
-const TABLE_PERSONS = 'Person'
+export const TABLE_PERSONS = 'Person'
 
 export interface Person extends WithId, CreatedUpdated, Sortable {
 	name: string

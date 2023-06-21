@@ -7,7 +7,7 @@ import { logChangesToServerData, logChangesToStoredData } from "../flags";
 import { Storage } from "@capacitor/storage";
 
 const STORAGE_KEY_TAGS = 'tags'
-const TABLE_TAGS = 'Tag'
+export const TABLE_TAGS = 'Tag'
 
 export interface Tag extends WithId, CreatedUpdated, Sortable {
 	name: string
