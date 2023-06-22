@@ -16,7 +16,7 @@ const PersonsView: React.FC = () => {
 		setPersons((oldPersons) => {
 			const index = oldPersons.findIndex(p => p.id === id)
 			if (index === -1) {
-				throw new Error(`Could not find tag to delete: id = ${id}`)
+				throw new Error(`Could not find person to delete: id = ${id}`)
 			}
 			return [
 				...oldPersons.slice(0, index),

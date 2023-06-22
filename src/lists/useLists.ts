@@ -1,21 +1,28 @@
-import { useRecoilState } from "recoil"
-import { List, listsState, makeList } from "./listModels"
+import { useSetRecoilState } from "recoil"
+import { listsState, makeList } from "./listModels"
 
 const useLists = () => {
-	const [lists, setLists] = useRecoilState(listsState)
+	const setLists = useSetRecoilState(listsState)
 
 	const addList = (name: string) => {
-		const newList: List = makeList(name)
-		const newLists: List[] = [
-			...lists,
-			newList
-		]
-		setLists(newLists)
+		setLists((oldLists) => [
+			...oldLists,
+			makeList(name, oldLists.length)
+		])
 	}
 
 	const deleteList = (listId: string) => {
-		const newLists: List[] = lists.filter(l => l.id !== listId)
-		setLists(newLists)
+		setLists((oldLists) => {
+			const index = oldLists.findIndex(l => l.id === listId)
+			if (index === -1) {
+				throw new Error(`Could not find list to delete: id = ${listId}`)
+			}
+			return [
+				...oldLists.slice(0, index),
+				...oldLists.slice(index + 1)
+					.map(l => ({ ...l, sortOrder: l.sortOrder - 1 })), // Adjust sort orders down
+			]
+		})
 	}
 
 	return {

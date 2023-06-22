@@ -31,14 +31,9 @@ const ListView: React.FC<ListViewProps> = ({ list }) => {
 	const [isAddItemInputOpen, setIsAddItemInputOpen] = useState<boolean>(false)
 	const [filters, setFilters] = useState<Filters>({})
 
-	useEffect(() => {
-		console.log(filters)
-	}, [filters])
-
 	const filteredItems: Item[] = list.items.filter(item => {
 		const hasItemStateFilter: boolean = filters.itemState !== undefined && filters.itemState.length > 0
 		const hasTagFilter: boolean = filters.tag !== undefined && filters.tag.length > 0
-		console.log('filter', filters.tag)
 		return (
 			(!hasItemStateFilter || filters.itemState!.includes(getCurrentItemState(item)))
 			&& (!hasTagFilter || filters.tag!.some(ft => {

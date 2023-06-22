@@ -2,7 +2,7 @@ import { AtomEffect, DefaultValue, RecoilValue, atom } from "recoil";
 import { v4 as uuid } from "uuid";
 import { makePersistenceEffect } from "../utils/persistenceUtils";
 import { markDeletedInDynamoDb, putInDynamoDb } from "../utils/serverUtils";
-import { CreatedUpdated, Sortable, WithId } from "../constants/modelConstants";
+import { CreatedUpdated, Deletable, Sortable, WithId } from "../constants/modelConstants";
 import { logChangesToServerData, logChangesToStoredData } from "../flags";
 import { Storage } from "@capacitor/storage";
 
@@ -48,7 +48,7 @@ const tagsPersistenceOnSetEffect = (newValue: Tag[]) => {
 	Storage.set({ key: STORAGE_KEY_TAGS, value: JSON.stringify(newValue) })
 }
 
-export const fetchedTagsState = atom<Tag[]>({
+export const fetchedTagsState = atom<(Tag & Deletable)[]>({
 	key: 'fetchedTagsState',
 	default: [],
 })
