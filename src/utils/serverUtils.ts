@@ -1,3 +1,4 @@
+import env from '../environment.json'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
 import { CreatedUpdated, Deletable, ServerObj, WithId } from '../constants/modelConstants'
@@ -5,12 +6,13 @@ import { getSyncedOn } from '../sync/useSync'
 import { parseTags } from '../tags/tagModel'
 
 const getClient = () => {
+	const { accessKeyId, secretAccessKey, region } = env
 	const client = new DynamoDBClient({
 		credentials: {
-			accessKeyId: 'AKIA3HRILWJYDERDXN7S',
-			secretAccessKey: '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',
+			accessKeyId,
+			secretAccessKey,
 		},
-		region: 'us-west-2',
+		region,
 	})
 	const docClient = DynamoDBDocument.from(client)
 	return docClient
