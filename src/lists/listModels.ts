@@ -1,8 +1,8 @@
 import { atom, AtomEffect, DefaultValue, RecoilValue, selector } from "recoil"
-import { Item, itemsRestorer } from "../items/itemModels"
+import { didItemChange, Item, parseItems } from "../items/itemModels"
 import { v4 as uuid } from "uuid";
 import { makePersistenceEffect } from "../utils/persistenceUtils";
-import { getUpdatedListsFromMasterListItem } from "../utils/itemUpdateUtils";
+import { makeUpdatedListsFromMasterListItem } from "../utils/itemUpdateUtils";
 import { CreatedUpdated, Deletable, Sortable, WithId } from "../constants/modelConstants";
 import { Storage } from "@capacitor/storage";
 import { logChangesToServerData, logChangesToStoredData } from "../flags";
@@ -33,7 +33,7 @@ export const parseLists = (savedLists: Partial<List>[]): List[] => {
 	return savedLists.map<List>((list, i) => ({
 		id: list.id!,
 		name: list.name!,
-		items: itemsRestorer(list.items),
+		items: parseItems(list.items ?? []),
 		isMaster: list.isMaster ?? false,
 		createdOn: list.createdOn ? new Date(list.createdOn) : new Date(),
 		updatedOn: list.updatedOn ? new Date(list.updatedOn) : new Date(),
@@ -68,17 +68,10 @@ const tripListItemsUpdaterEffect: AtomEffect<List[]> = ({ setSelf, onSet }) => {
 			const previousItem: Item | undefined = previousLists[0].items.find(pi => pi.id === masterListItem.id)
 			if (!previousItem) return false
 
-			const { assignedToListIds: throwaway1, ...previousItemWithoutListIds } = previousItem
-			const { assignedToListIds: throwaway2, ...currentItemWithoutListIds } = masterListItem
-			const didItemChange: boolean = (
-				JSON.stringify(currentItemWithoutListIds) !== JSON.stringify(previousItemWithoutListIds)
-			)
-			return didItemChange
+			return didItemChange(previousItem, masterListItem)
 		})
 		const listsWithTripListItemsUpdated: List[] = updatedMasterListItems.reduce<List[]>(
-			(listsAccumulator, masterListItem) => {
-				return getUpdatedListsFromMasterListItem(listsAccumulator, masterListItem)
-			},
+			makeUpdatedListsFromMasterListItem,
 			updatedLists
 		)
 		setSelf(listsWithTripListItemsUpdated)

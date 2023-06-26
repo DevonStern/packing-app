@@ -9,9 +9,11 @@ import { Storage } from "@capacitor/storage";
 const STORAGE_KEY_TAGS = 'tags'
 export const TABLE_TAGS = 'Tag'
 
-export interface Tag extends WithId, CreatedUpdated, Sortable {
+export interface BaseTag extends WithId {
 	name: string
 }
+
+export interface Tag extends BaseTag, CreatedUpdated, Sortable {}
 
 export const makeTag = (name: string, sortOrder: number): Tag => ({
 	id: uuid(),
