@@ -20,9 +20,12 @@ const listItemsState = selectorFamily({
 		set(listsState, (previousLists) => {
 			return previousLists.map(list => {
 				if (list.id === listId) {
+					const numberOfItemsChanged = list.items.length !== newItems.length
+					const newUpdatedOn: Date = numberOfItemsChanged ? new Date() : list.updatedOn
 					return {
 						...list,
 						items: newItems,
+						updatedOn: newUpdatedOn,
 					}
 				}
 				return list
@@ -45,7 +48,10 @@ const useListItems = (listId: string) => {
 		setItems((oldItems) => {
 			return oldItems.map(i => {
 				if (i.id === updatedItem.id) {
-					return updatedItem
+					return {
+						...updatedItem,
+						updatedOn: new Date(),
+					}
 				}
 				return i
 			})
@@ -60,7 +66,10 @@ const useListItems = (listId: string) => {
 		setItems((oldItems) => {
 			return oldItems.map(item => {
 				if (selectedItems.some(si => si.id === item.id)) {
-					return makeUpdatedItem(item, updatedValue)
+					return {
+						...makeUpdatedItem(item, updatedValue),
+						updatedOn: new Date(),
+					}
 				}
 				return item
 			})
@@ -68,10 +77,13 @@ const useListItems = (listId: string) => {
 	}
 
 	const createItem = (name: string) => {
-		setItems((oldItems) => [
-			...oldItems,
-			makeItem(name),
-		])
+		setItems((oldItems) => {
+			const nextSortOrder = oldItems[oldItems.length - 1].sortOrder + 1
+			return [
+				...oldItems,
+				makeItem(name, nextSortOrder),
+			]
+		})
 	}
 
 	const assignItems = (selectedItems: Item[]) => {
@@ -85,21 +97,32 @@ const useListItems = (listId: string) => {
 				const { assignedToListIds, ...itemWithoutListIds } = item
 				return itemWithoutListIds
 			})
+			let nextSortOrder: number = oldItems[oldItems.length - 1].sortOrder
+			const itemsToAdd: Item[] = selectedItemsWithoutListIds.map(item => {
+				nextSortOrder++
+				return {
+					...item,
+					createdOn: new Date(),
+					updatedOn: new Date(),
+					sortOrder: nextSortOrder,
+				}
+			})
 			return [
 				...oldItems,
-				...selectedItemsWithoutListIds,
+				...itemsToAdd,
 			]
 		})
 	}
 
 	const addListToMasterItems = (selectedItems: Item[]) => {
 		setMasterList((oldMasterList) => {
-			const selectedItemsWithListIds: Item[] = selectedItems.map<Item>(item => ({
+			const selectedItemsWithNewListIds: Item[] = selectedItems.map<Item>(item => ({
 				...item,
-				assignedToListIds: getAssignedToListIds(item)
+				assignedToListIds: makeAssignedToListIds(item),
+				updatedOn: new Date(),
 			}))
 			const updatedMasterItems: Item[] = oldMasterList.items.map(item => {
-				const selectedItem: Item | undefined = selectedItemsWithListIds.find(selectedItem => selectedItem.id === item.id)
+				const selectedItem: Item | undefined = selectedItemsWithNewListIds.find(selectedItem => selectedItem.id === item.id)
 				if (selectedItem) {
 					return selectedItem
 				}
@@ -112,7 +135,7 @@ const useListItems = (listId: string) => {
 		})
 	}
 
-	const getAssignedToListIds = (item: Item): string[] => {
+	const makeAssignedToListIds = (item: Item): string[] => {
 		if (item.assignedToListIds) {
 			return [
 				...item.assignedToListIds,
@@ -148,6 +171,7 @@ const useListItems = (listId: string) => {
 		const updatedList: List = {
 			...list,
 			items: updatedItems,
+			updatedOn: new Date(),
 		}
 		return updatedList
 	}
@@ -165,7 +189,8 @@ const useListItems = (listId: string) => {
 				undefined
 			const updatedMasterListItem: Item = {
 				...masterListItem,
-				assignedToListIds: updatedAssignedToListIds
+				assignedToListIds: updatedAssignedToListIds,
+				updatedOn: new Date(),
 			}
 			const updatedMasterListItems: Item[] = previousMasterList.items.map(i => {
 				if (i.id === item.id) {

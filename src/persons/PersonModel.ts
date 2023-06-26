@@ -9,9 +9,11 @@ import { markDeletedInDynamoDb, putInDynamoDb } from "../utils/serverUtils";
 const STORAGE_KEY_PERSONS = 'persons'
 export const TABLE_PERSONS = 'Person'
 
-export interface Person extends WithId, CreatedUpdated, Sortable {
+export interface BasePerson extends WithId {
 	name: string
 }
+
+export interface Person extends BasePerson, CreatedUpdated, Sortable {}
 
 export const makePerson = (name: string, sortOrder: number): Person => ({
 	id: uuid(),
