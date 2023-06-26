@@ -84,7 +84,7 @@ interface ItemNameInputProps {
 const ItemNameInput: React.FC<ItemNameInputProps> = ({ list, item, setIsEditingName }) => {
 	const [name, setName] = useState<string>(item.name)
 
-	const { updateItemName } = useListItems(list)
+	const { updateItemName } = useListItems(list.id)
 	const inputRef = useRef<HTMLIonInputElement | null>(null)
 	useInputFocus(inputRef)
 

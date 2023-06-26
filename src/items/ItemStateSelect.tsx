@@ -22,7 +22,7 @@ const ItemStateSelect: React.FC<ItemStateSelectProps> = ({ list, selectedItems, 
 	const [selectedState, setSelectedState] = useState<ItemState | undefined>(defaultValue)
 	const [wasCancelled, setWasCancelled] = useState<boolean>(false)
 
-	const { updateItemStateOnItems } = useListItems(list)
+	const { updateItemStateOnItems } = useListItems(list.id)
 	const selectRef = useRef<HTMLIonSelectElement | null>(null)
 
 	useEffect(() => {

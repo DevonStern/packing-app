@@ -7,7 +7,7 @@ interface AddItemInputProps {
 }
 
 const AddItemInput: React.FC<AddItemInputProps> = ({ list }) => {
-	const { createItem } = useListItems(list)
+	const { createItem } = useListItems(list.id)
 
 	return (
 		<AddObjectInput

@@ -1,65 +1,77 @@
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil"
+import { DefaultValue, selectorFamily, useRecoilState, useRecoilValue, useSetRecoilState } from "recoil"
 import { List, listsState, masterListState } from "../lists/listModels"
 import { Person, personsState } from "../persons/personModel"
 import { Tag, tagsState } from "../tags/tagModel"
-import { getItemPersonWithNextState } from "../utils/itemStateUtils"
+import { makeItemPersonWithNextState } from "../utils/itemStateUtils"
 import { DEFAULT_ITEM_STATE, Item, ItemPerson, ItemState, makeItem } from "./itemModels"
 import useItemUpdates from "./useItemUpdates"
 
-const useListItems = (list: List) => {
+const listItemsState = selectorFamily({
+	key: 'listItemsState',
+	get: (listId: string) => ({ get }) => {
+		const list = get(listsState).find(potentialMatch => potentialMatch.id === listId)
+		if (!list) throw new Error(`Failed to find matching list when getting list items: listId = ${listId}`)
+		return list.items
+	},
+	set: (listId: string) => ({ set }, newItems) => {
+		if (newItems instanceof DefaultValue) {
+			throw new Error(`DefaultValue? That shouldn't happen at all.`)
+		}
+		set(listsState, (previousLists) => {
+			return previousLists.map(list => {
+				if (list.id === listId) {
+					return {
+						...list,
+						items: newItems,
+					}
+				}
+				return list
+			})
+		})
+	},
+})
+
+const useListItems = (listId: string) => {
 	const setLists = useSetRecoilState(listsState)
-	const [masterList, setMasterList] = useRecoilState(masterListState)
+	const [{ id: masterListId }, setMasterList] = useRecoilState(masterListState)
+	const setItems = useSetRecoilState(listItemsState(listId))
 	const persons = useRecoilValue(personsState)
 	const tags = useRecoilValue(tagsState)
 
-	const { getItemWithOverriddenPropIfNeeded } = useItemUpdates()
+	const isMasterList = listId === masterListId
+	const { makeItemWithOverriddenPropIfNeeded } = useItemUpdates(isMasterList)
 
-	const setItem = (item: Item, updatedItem: Item) => {
-		const updatedItems: Item[] = list.items.map(i => {
-			if (i.id === item.id) {
-				return updatedItem
-			}
-			return i
+	const setItem = (updatedItem: Item) => {
+		setItems((oldItems) => {
+			return oldItems.map(i => {
+				if (i.id === updatedItem.id) {
+					return updatedItem
+				}
+				return i
+			})
 		})
-		setItems(updatedItems)
 	}
 
 	const setSelectedItems = (
 		selectedItems: Item[],
 		updatedValue: any,
-		getUpdatedItem: (item: Item, updatedValue: any) => Item
+		makeUpdatedItem: (item: Item, updatedValue: any) => Item
 	) => {
-		const updatedItems: Item[] = list.items.map(item => {
-			if (selectedItems.some(si => si.id === item.id)) {
-				return getUpdatedItem(item, updatedValue)
-			}
-			return item
-		})
-		setItems(updatedItems)
-	}
-
-	const setItems = (updatedItems: Item[]) => {
-		const updatedList: List = {
-			...list,
-			items: updatedItems
-		}
-		setLists(previousLists => {
-			return previousLists.map(l => {
-				if (l.id === list.id) {
-					return updatedList
+		setItems((oldItems) => {
+			return oldItems.map(item => {
+				if (selectedItems.some(si => si.id === item.id)) {
+					return makeUpdatedItem(item, updatedValue)
 				}
-				return l
+				return item
 			})
 		})
 	}
 
 	const createItem = (name: string) => {
-		const newItem: Item = makeItem(name)
-		const updatedItems: Item[] = [
-			...list.items,
-			newItem
-		]
-		setItems(updatedItems)
+		setItems((oldItems) => [
+			...oldItems,
+			makeItem(name),
+		])
 	}
 
 	const assignItems = (selectedItems: Item[]) => {
@@ -68,48 +80,50 @@ const useListItems = (list: List) => {
 	}
 
 	const addItemsToList = (selectedItems: Item[]) => {
-		const selectedItemsWithoutListIds: Item[] = selectedItems.map<Item>(item => {
-			const { assignedToListIds, ...itemWithoutListIds } = item
-			return itemWithoutListIds
+		setItems((oldItems) => {
+			const selectedItemsWithoutListIds: Item[] = selectedItems.map<Item>(item => {
+				const { assignedToListIds, ...itemWithoutListIds } = item
+				return itemWithoutListIds
+			})
+			return [
+				...oldItems,
+				...selectedItemsWithoutListIds,
+			]
 		})
-		const updatedItems: Item[] = [
-			...list.items,
-			...selectedItemsWithoutListIds
-		]
-		setItems(updatedItems)
 	}
 
 	const addListToMasterItems = (selectedItems: Item[]) => {
-		const selectedItemsWithListIds: Item[] = selectedItems.map<Item>(item => ({
-			...item,
-			assignedToListIds: getAssignedToListIds(item)
-		}))
-		const updatedMasterItems: Item[] = masterList.items.map(item => {
-			const selectedItem: Item | undefined = selectedItemsWithListIds.find(selectedItem => selectedItem.id === item.id)
-			if (selectedItem) {
-				return selectedItem
+		setMasterList((oldMasterList) => {
+			const selectedItemsWithListIds: Item[] = selectedItems.map<Item>(item => ({
+				...item,
+				assignedToListIds: getAssignedToListIds(item)
+			}))
+			const updatedMasterItems: Item[] = oldMasterList.items.map(item => {
+				const selectedItem: Item | undefined = selectedItemsWithListIds.find(selectedItem => selectedItem.id === item.id)
+				if (selectedItem) {
+					return selectedItem
+				}
+				return item
+			})
+			return {
+				...oldMasterList,
+				items: updatedMasterItems,
 			}
-			return item
 		})
-		const updatedMasterList: List = {
-			...masterList,
-			items: updatedMasterItems
-		}
-		setMasterList(updatedMasterList)
 	}
 
 	const getAssignedToListIds = (item: Item): string[] => {
 		if (item.assignedToListIds) {
 			return [
 				...item.assignedToListIds,
-				list.id
+				listId,
 			]
 		}
-		return [list.id]
+		return [listId]
 	}
 
 	const deleteItem = (item: Item) => {
-		if (list.isMaster) {
+		if (isMasterList) {
 			deleteItemFromLinkedLists(item)
 		} else {
 			deleteLinkFromMasterListItem(item)
@@ -120,53 +134,61 @@ const useListItems = (list: List) => {
 	const deleteItemFromLinkedLists = (item: Item) => {
 		const listIds: string[] = item.assignedToListIds ?? []
 		setLists((previousLists) => {
-			return previousLists.map(l => {
-				if (listIds.includes(l.id)) {
-					return getListWithItemRemoved(l, item)
+			return previousLists.map(list => {
+				if (listIds.includes(list.id)) {
+					return makeListWithItemRemoved(list, item)
 				}
-				return l
+				return list
 			})
 		})
 	}
 
-	const getListWithItemRemoved = (l: List, item: Item): List => {
-		const updatedItems: Item[] = l.items.filter(i => i.id !== item.id)
+	const makeListWithItemRemoved = (list: List, item: Item): List => {
+		const updatedItems: Item[] = list.items.filter(i => i.id !== item.id)
 		const updatedList: List = {
-			...l,
-			items: updatedItems
+			...list,
+			items: updatedItems,
 		}
 		return updatedList
 	}
 
 	const deleteLinkFromMasterListItem = (item: Item) => {
-		const masterListItem: Item | undefined = masterList.items.find(i => i.id === item.id)
-		if (!masterListItem) {
-			throw new Error(`Master list item not found - id = ${list.id}`)
-		}
-		const updatedAssignedToListIds: string[] | undefined = masterListItem.assignedToListIds ?
-			masterListItem.assignedToListIds.filter(id => id !== list.id) :
-			undefined
-		const updatedMasterListItem: Item = {
-			...masterListItem,
-			assignedToListIds: updatedAssignedToListIds
-		}
-		const updatedMasterListItems: Item[] = masterList.items.map(i => {
-			if (i.id === item.id) {
-				return updatedMasterListItem
+		setMasterList((previousMasterList) => {
+			const masterListItem: Item | undefined = previousMasterList.items.find(i => i.id === item.id)
+			if (!masterListItem) {
+				throw new Error(`Master list item not found while deleting link from master list item:` +
+					` listId = ${listId}, itemId = ${item.id}`
+				)
 			}
-			return i
+			const updatedAssignedToListIds: string[] | undefined = masterListItem.assignedToListIds ?
+				masterListItem.assignedToListIds.filter(id => id !== listId) :
+				undefined
+			const updatedMasterListItem: Item = {
+				...masterListItem,
+				assignedToListIds: updatedAssignedToListIds
+			}
+			const updatedMasterListItems: Item[] = previousMasterList.items.map(i => {
+				if (i.id === item.id) {
+					return updatedMasterListItem
+				}
+				return i
+			})
+			return {
+				...previousMasterList,
+				items: updatedMasterListItems
+			}
 		})
-		setMasterList((previousMasterList) => ({
-			...previousMasterList,
-			items: updatedMasterListItems
-		}))
 	}
 
 	const deleteItemFromList = (item: Item) => {
-		const updatedList: List = getListWithItemRemoved(list, item)
 		setLists((previousLists) => {
+			const list = previousLists.find(l => l.id === listId)
+			if (!list) {
+				throw new Error(`List not found while deleting item from list: listId = ${listId}, itemId = ${item.id}`)
+			}
+			const updatedList: List = makeListWithItemRemoved(list, item)
 			return previousLists.map(l => {
-				if (l.id === list.id) {
+				if (l.id === listId) {
 					return updatedList
 				}
 				return l
@@ -175,19 +197,19 @@ const useListItems = (list: List) => {
 	}
 
 	const updateItemStateOnItems = (selectedItems: Item[], state: ItemState) => {
-		setSelectedItems(selectedItems, state, getItemWithUpdatedState)
+		setSelectedItems(selectedItems, state, makeItemWithUpdatedState)
 	}
 
-	const getItemWithUpdatedState = (item: Item, state: ItemState): Item => {
+	const makeItemWithUpdatedState = (item: Item, state: ItemState): Item => {
 		if (item.persons.length > 0) {
-			return getUpdatedItemPersonStates(item, state)
+			return makeUpdatedItemPersonStates(item, state)
 		} else {
-			return getUpdatedMainItemState(item, state)
+			return makeUpdatedMainItemState(item, state)
 		}
 	}
 
-	const getUpdatedItemPersonStates = (item: Item, state: ItemState): Item => {
-		const itemWithOverriddenProp: Item = getItemWithOverriddenPropIfNeeded(list, item, 'persons')
+	const makeUpdatedItemPersonStates = (item: Item, state: ItemState): Item => {
+		const itemWithOverriddenProp: Item = makeItemWithOverriddenPropIfNeeded(item, 'persons')
 		const updatedItemPersons: ItemPerson[] = itemWithOverriddenProp.persons.map(ip => {
 			return {
 				...ip,
@@ -201,8 +223,8 @@ const useListItems = (list: List) => {
 		return updatedItem
 	}
 
-	const getUpdatedMainItemState = (item: Item, state: ItemState): Item => {
-		const itemWithOverriddenProp: Item = getItemWithOverriddenPropIfNeeded(list, item, 'state')
+	const makeUpdatedMainItemState = (item: Item, state: ItemState): Item => {
+		const itemWithOverriddenProp: Item = makeItemWithOverriddenPropIfNeeded(item, 'state')
 		const updatedItem: Item = {
 			...itemWithOverriddenProp,
 			state
@@ -212,11 +234,11 @@ const useListItems = (list: List) => {
 
 	const updateItemPersonsOnItems = (selectedItems: Item[], personIds: string[]) => {
 		const updatedPersons: Person[] = persons.filter(p => personIds.some(id => id === p.id))
-		setSelectedItems(selectedItems, updatedPersons, getItemWithUpdatedPersons)
+		setSelectedItems(selectedItems, updatedPersons, makeItemWithUpdatedPersons)
 	}
 
-	const getItemWithUpdatedPersons = (item: Item, updatedPersons: Person[]): Item => {
-		const itemWithOverriddenProp: Item = getItemWithOverriddenPropIfNeeded(list, item, 'persons')
+	const makeItemWithUpdatedPersons = (item: Item, updatedPersons: Person[]): Item => {
+		const itemWithOverriddenProp: Item = makeItemWithOverriddenPropIfNeeded(item, 'persons')
 		const updatedItemPersons: ItemPerson[] = updatedPersons.map(person => {
 			const currentItemPerson: ItemPerson | undefined = itemWithOverriddenProp.persons.find(ip => ip.person.id === person.id)
 			const state: ItemState = currentItemPerson?.state ?? DEFAULT_ITEM_STATE
@@ -234,11 +256,11 @@ const useListItems = (list: List) => {
 
 	const updateTagsOnItems = (selectedItems: Item[], tagIds: string[]) => {
 		const updatedTags: Tag[] = tags.filter(t => tagIds.some(id => id === t.id))
-		setSelectedItems(selectedItems, updatedTags, getItemWithUpdatedTags)
+		setSelectedItems(selectedItems, updatedTags, makeItemWithUpdatedTags)
 	}
 
-	const getItemWithUpdatedTags = (item: Item, tags: Tag[]): Item => {
-		const itemWithOverriddenProp: Item = getItemWithOverriddenPropIfNeeded(list, item, 'tags')
+	const makeItemWithUpdatedTags = (item: Item, tags: Tag[]): Item => {
+		const itemWithOverriddenProp: Item = makeItemWithOverriddenPropIfNeeded(item, 'tags')
 		const updatedItem: Item = {
 			...itemWithOverriddenProp,
 			tags,
@@ -248,11 +270,11 @@ const useListItems = (list: List) => {
 
 	const addTagsOnItems = (selectedItems: Item[], tagIds: string[]) => {
 		const addedTags: Tag[] = tags.filter(t => tagIds.some(id => id === t.id))
-		setSelectedItems(selectedItems, addedTags, getItemWithAddedTags)
+		setSelectedItems(selectedItems, addedTags, makeItemWithAddedTags)
 	}
 
-	const getItemWithAddedTags = (item: Item, tags: Tag[]): Item => {
-		const itemWithOverriddenProp: Item = getItemWithOverriddenPropIfNeeded(list, item, 'tags')
+	const makeItemWithAddedTags = (item: Item, tags: Tag[]): Item => {
+		const itemWithOverriddenProp: Item = makeItemWithOverriddenPropIfNeeded(item, 'tags')
 		const newTags: Tag[] = tags.filter(t => !item.tags.some(it => it.id === t.id))
 		const updatedItem: Item = {
 			...itemWithOverriddenProp,
@@ -265,17 +287,17 @@ const useListItems = (list: List) => {
 	}
 
 	const updateItemName = (item: Item, name: string) => {
-		const itemWithOverriddenProp: Item = getItemWithOverriddenPropIfNeeded(list, item, 'name')
+		const itemWithOverriddenProp: Item = makeItemWithOverriddenPropIfNeeded(item, 'name')
 		const updatedItem: Item = {
 			...itemWithOverriddenProp,
 			name,
 		}
-		setItem(item, updatedItem)
+		setItem(updatedItem)
 	}
 
 	const advanceItemPersonState = (item: Item, itemPerson: ItemPerson) => {
-		const itemWithOverriddenProp: Item = getItemWithOverriddenPropIfNeeded(list, item, 'persons')
-		const updatedItemPerson: ItemPerson = getItemPersonWithNextState(itemPerson)
+		const itemWithOverriddenProp: Item = makeItemWithOverriddenPropIfNeeded(item, 'persons')
+		const updatedItemPerson: ItemPerson = makeItemPersonWithNextState(itemPerson)
 		const updatedItemPersons: ItemPerson[] = itemWithOverriddenProp.persons.map(ip => {
 			if (ip.person.id === itemPerson.person.id) {
 				return updatedItemPerson
@@ -286,7 +308,7 @@ const useListItems = (list: List) => {
 			...itemWithOverriddenProp,
 			persons: updatedItemPersons
 		}
-		setItem(item, updatedItem)
+		setItem(updatedItem)
 	}
 
 	return {

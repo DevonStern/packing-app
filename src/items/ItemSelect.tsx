@@ -15,7 +15,7 @@ const ItemSelect: React.FC<ItemSelectProps> = ({ list }) => {
 
 	const [selectedItems, setSelectedItems] = useState<Item[]>([])
 
-	const { assignItems: addItems } = useListItems(list)
+	const { assignItems: addItems } = useListItems(list.id)
 
 	return (
 		<>

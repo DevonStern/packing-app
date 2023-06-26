@@ -1,13 +1,11 @@
-import { List } from "../lists/listModels";
 import { Item } from "./itemModels";
 
-const useItemUpdates = () => {
-	const getItemWithOverriddenPropIfNeeded = (
-		list: List,
+const useItemUpdates = (isMasterList: boolean) => {
+	const makeItemWithOverriddenPropIfNeeded = (
 		item: Item,
 		overridenPropKey: 'name' | 'persons' | 'state' | 'tags'
 	): Item => {
-		if (list.isMaster) {
+		if (isMasterList) {
 			return item
 		}
 
@@ -26,7 +24,7 @@ const useItemUpdates = () => {
 	}
 
 	return {
-		getItemWithOverriddenPropIfNeeded,
+		makeItemWithOverriddenPropIfNeeded,
 	}
 }
 

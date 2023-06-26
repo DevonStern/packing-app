@@ -12,7 +12,7 @@ interface ItemPersonRowProps {
 }
 
 const ItemPersonRow: React.FC<ItemPersonRowProps> = ({ list, item, itemPerson }) => {
-	const { advanceItemPersonState } = useListItems(list)
+	const { advanceItemPersonState } = useListItems(list.id)
 	
 	const { person, state } = itemPerson
 

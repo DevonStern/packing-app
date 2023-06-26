@@ -21,7 +21,7 @@ const PersonSelect: React.FC<PersonSelectProps> = ({ list, selectedItems, openSe
 	const [ids, setIds] = useState<string[]>(defaultValue)
 	const [wasCancelled, setWasCancelled] = useState<boolean>(false)
 
-	const { updateItemPersonsOnItems } = useListItems(list)
+	const { updateItemPersonsOnItems } = useListItems(list.id)
 	const selectRef = useRef<HTMLIonSelectElement | null>(null)
 
 	useEffect(() => {

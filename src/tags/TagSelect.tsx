@@ -22,7 +22,7 @@ const TagSelect: React.FC<TagSelectProps> = ({ list, selectedItems, openSelect, 
 	const [ids, setIds] = useState<string[]>(defaultValue)
 	const [wasCancelled, setWasCancelled] = useState<boolean>(false)
 
-	const { updateTagsOnItems, addTagsOnItems } = useListItems(list)
+	const { updateTagsOnItems, addTagsOnItems } = useListItems(list.id)
 	const selectRef = useRef<HTMLIonSelectElement | null>(null)
 
 	useEffect(() => {

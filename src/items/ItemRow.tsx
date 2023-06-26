@@ -14,7 +14,7 @@ interface ItemRowProps {
 
 const ItemRow: React.FC<ItemRowProps> = ({ list, item }) => {
 	const history = useHistory()
-	const { advanceItemPersonState, deleteItem } = useListItems(list)
+	const { advanceItemPersonState, deleteItem } = useListItems(list.id)
 	const { moveWholeState } = useItemState(list, item)
 
 	const goToItem = () => {

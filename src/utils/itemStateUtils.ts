@@ -46,7 +46,7 @@ export const getCurrentItemState = (item: Item): ItemState => {
 	}
 }
 
-export const getItemPersonWithNextState = (itemPerson: ItemPerson): ItemPerson => {
+export const makeItemPersonWithNextState = (itemPerson: ItemPerson): ItemPerson => {
 	if (isLastItemState(itemPerson.state)) return itemPerson
 	
 	const nextState: ItemState = getNextItemState(itemPerson.state)
