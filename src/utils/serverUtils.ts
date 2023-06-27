@@ -13,7 +13,11 @@ const getClient = () => {
 		},
 		region,
 	})
-	const docClient = DynamoDBDocument.from(client)
+	const docClient = DynamoDBDocument.from(client, {
+		marshallOptions: {
+			removeUndefinedValues: true,
+		},
+	})
 	return docClient
 }
 
