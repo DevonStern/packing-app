@@ -23,6 +23,8 @@ export const makeTag = (name: string, sortOrder: number): Tag => ({
 	sortOrder,
 })
 
+// We have to be very specific in the parsers about what properties to include so we don't get unwanted properties
+// (such as `serverUpdatedOn`).
 export const parseTags = (tags: Partial<Tag>[]): Tag[] => {
 	return tags.map<Tag>((tag, i) => ({
 		id: tag.id!,

@@ -3,7 +3,6 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
 import { CreatedUpdated, Deletable, ServerObj, WithId } from '../constants/modelConstants'
 import { getSyncedOn } from '../sync/useSync'
-import { parseTags } from '../tags/tagModel'
 
 const getClient = () => {
 	const { accessKeyId, secretAccessKey, region } = env
@@ -18,43 +17,49 @@ const getClient = () => {
 	return docClient
 }
 
-export const scanInDynamoDb = async <T>(
+export const scanInDynamoDb = async <T extends WithId>(
 	table: string,
+	parser: (records: Partial<T>[]) => T[],
 	filterExpression?: string,
 	expressionAttributeValues?: any,
 ): Promise<(T & Deletable)[]> => {
 	const client = getClient()
 	try {
-		const results = await client.scan({
+		const { Items } = await client.scan({
 			TableName: table,
 			FilterExpression: filterExpression,
 			ExpressionAttributeValues: expressionAttributeValues,
 		})
-		const parsed = parseTags(results.Items ?? [])
-			const parsedWithDeleted = parsed.map(tag => {
-				if (results.Items?.find(i => i.id === tag.id && i.deleted)) {
-					return {
-						...tag,
-						deleted: true,
-					}
+		const parsed = parser(Items as any[] ?? [])
+		// We have to be very specific in the parsers about what properties to include so we don't get unwanted properties
+		// (such as `serverUpdatedOn`). So now we need to add back in the `deleted` properties.
+		const parsedWithDeleted = parsed.map(p => {
+			if (Items?.find(i => i.id === p.id && i.deleted)) {
+				return {
+					...p,
+					deleted: true,
 				}
-				return tag
-			})
+			}
+			return p
+		})
 		console.log('scanned in DynamoDB', parsedWithDeleted)
-		return parsedWithDeleted as any[]
+		return parsedWithDeleted
 	} catch (error) {
 		console.error('Failed to scan items from DynamoDB', error)
 		throw error
 	}
 }
 
-export const getChangesFromDynamoDb = async <T>(table: string): Promise<(T & Deletable)[]> => {
+export const getChangesFromDynamoDb = async <T extends WithId>(
+	table: string,
+	parser: (records: Partial<T>[]) => T[],
+): Promise<(T & Deletable)[]> => {
 	const syncedOn: Date = await getSyncedOn()
 	const expressionAttributeValues = {
 		":so": syncedOn.toISOString(),
 	}
 	const filterExpression = `serverUpdatedOn > :so`
-	return scanInDynamoDb(table, filterExpression, expressionAttributeValues)
+	return scanInDynamoDb(table, parser, filterExpression, expressionAttributeValues)
 }
 
 export const putInDynamoDb = async <T extends WithId & CreatedUpdated>(table: string, item: T) => {
@@ -72,7 +77,7 @@ export const putInDynamoDb = async <T extends WithId & CreatedUpdated>(table: st
 			// ConditionExpression: 'attribute_not_exists(id)',
 		})
 		console.log('put in DynamoDB', results)
-	} catch (error: any) {
+	} catch (error) {
 		// if (error.name === 'ConditionalCheckFailedException') {
 		// 	console.log(`Item already exists`)
 		// 	return
@@ -100,7 +105,7 @@ export const markDeletedInDynamoDb = async <T extends WithId & CreatedUpdated>(t
 			Item: newItem,
 		})
 		console.log('marked deleted in DynamoDB', results)
-	} catch (error: any) {
+	} catch (error) {
 		console.error(error)
 	}
 }

@@ -23,6 +23,8 @@ export const makePerson = (name: string, sortOrder: number): Person => ({
 	sortOrder,
 })
 
+// We have to be very specific in the parsers about what properties to include so we don't get unwanted properties
+// (such as `serverUpdatedOn`).
 export const parsePersons = (persons: Partial<Person>[]): Person[] => {
 	return persons.map<Person>((person, i) => ({
 		id: person.id!,

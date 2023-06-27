@@ -9,7 +9,7 @@ export interface Item extends WithId, CreatedUpdated, Sortable {
 	name: string
 	persons: ItemPerson[]
 	state: ItemState
-	tags: BaseTag[] //TODO: Change tags to just the IDs, get rid of BaseTag
+	tags: BaseTag[]
 }
 
 export const overridableProps: ('name' | 'persons' | 'state' | 'tags')[] = [
@@ -27,7 +27,7 @@ export enum ItemState {
 }
 
 export interface ItemPerson {
-	person: BasePerson // TODO: Change person to just the ID, get rid of BasePerson
+	person: BasePerson
 	state: ItemState
 }
 
@@ -44,10 +44,13 @@ export const makeItem = (name: string, sortOrder: number): Item => ({
 	sortOrder,
 })
 
+// We have to be very specific in the parsers about what properties to include so we don't get unwanted properties
+// (such as `serverUpdatedOn`).
 export const parseItems = (savedItems: Partial<Item>[]): Item[] => {
 	return savedItems.map<Item>((item, i) => ({
-		...item,
 		id: item.id!,
+		assignedToListIds: item.assignedToListIds,
+		overriddenProps: item.overriddenProps,
 		name: item.name!,
 		persons: item.persons ?? [],
 		state: item.state ?? DEFAULT_ITEM_STATE,

@@ -1,10 +1,9 @@
 import { Storage } from "@capacitor/storage";
 import { getChangesFromDynamoDb } from "../utils/serverUtils";
-import { TABLE_TAGS, fetchedTagsState, tagsState } from "../tags/tagModel";
+import { TABLE_TAGS, fetchedTagsState, parseTags, tagsState } from "../tags/tagModel";
 import { SetterOrUpdater, useSetRecoilState } from "recoil";
 import { syncFlag } from "../flags";
-import { TABLE_PERSONS, fetchedPersonsState, personsState } from "../persons/personModel";
-import { CreatedUpdated, Sortable, WithId } from "../constants/modelConstants";
+import { TABLE_PERSONS, fetchedPersonsState, parsePersons, personsState } from "../persons/personModel";
 
 const STORAGE_KEY_SYNC = 'sync'
 
@@ -31,8 +30,8 @@ const useSync = () => {
 		if (!syncFlag) return
 
 		await Promise.all([
-			syncTable(TABLE_PERSONS, setPersons, setFetchedPersons),
-			syncTable(TABLE_TAGS, setTags, setFetchedTags),
+			syncTable(TABLE_PERSONS, parsePersons, setPersons, setFetchedPersons),
+			syncTable(TABLE_TAGS, parseTags, setTags, setFetchedTags),
 		])
 
 		await setSyncedOnNow()
@@ -40,10 +39,11 @@ const useSync = () => {
 
 	const syncTable = async <T extends WithId & Sortable & CreatedUpdated>(
 		tableName: string,
+		parser: (records: Partial<T>[]) => T[],
 		set: SetterOrUpdater<T[]>,
 		setFetched: SetterOrUpdater<T[]>,
 	) => {
-		const changes = await getChangesFromDynamoDb<T>(tableName)
+		const changes = await getChangesFromDynamoDb<T>(tableName, parser)
 		setFetched(changes)
 		if (changes.length > 0) {
 			set(values => {

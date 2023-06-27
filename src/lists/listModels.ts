@@ -1,5 +1,5 @@
 import { atom, AtomEffect, DefaultValue, RecoilValue, selector } from "recoil"
-import { didItemChange, Item, parseItems } from "../items/itemModels"
+import { didItemChange, Item, itemsServerOnSetEffect, parseItems } from "../items/itemModels"
 import { v4 as uuid } from "uuid";
 import { makePersistenceEffect } from "../utils/persistenceUtils";
 import { makeUpdatedListsFromMasterListItem } from "../utils/itemUpdateUtils";
@@ -29,11 +29,27 @@ export const makeList = (name: string, sortOrder: number): List => ({
 	sortOrder,
 })
 
+// We have to be very specific in the parsers about what properties to include so we don't get unwanted properties
+// (such as `serverUpdatedOn`).
 export const parseLists = (savedLists: Partial<List>[]): List[] => {
 	return savedLists.map<List>((list, i) => ({
 		id: list.id!,
 		name: list.name!,
 		items: parseItems(list.items ?? []),
+		isMaster: list.isMaster ?? false,
+		createdOn: list.createdOn ? new Date(list.createdOn) : new Date(),
+		updatedOn: list.updatedOn ? new Date(list.updatedOn) : new Date(),
+		sortOrder: list.sortOrder ?? i,
+	}))
+}
+
+// We have to be very specific in the parsers about what properties to include so we don't get unwanted properties
+// (such as `serverUpdatedOn`).
+export const parseServerLists = (savedLists: Partial<ServerList>[]): ServerList[] => {
+	return savedLists.map<ServerList>((list, i) => ({
+		id: list.id!,
+		name: list.name!,
+		itemIds: list.itemIds ?? [],
 		isMaster: list.isMaster ?? false,
 		createdOn: list.createdOn ? new Date(list.createdOn) : new Date(),
 		updatedOn: list.updatedOn ? new Date(list.updatedOn) : new Date(),
@@ -161,6 +177,7 @@ const listsEffect: AtomEffect<List[]> = ({ setSelf, onSet, getPromise }) => {
 
 	onSet(listsPersistenceOnSetEffect)
 	onSet(listsServerOnSetEffect(getPromise))
+	onSet(itemsServerOnSetEffect(getPromise))
 }
 
 export const listsState = atom<List[]>({
