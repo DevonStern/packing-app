@@ -57,7 +57,7 @@ export const parseServerLists = (savedLists: Partial<ServerList>[]): ServerList[
 	}))
 }
 
-export const useListConverter = (allItems: Item[]) => {
+export const makeListConverter = (allItems: Item[]) => {
 	const convertServerListsToLists = (serverLists: (ServerList & Deletable)[]): (List & Deletable)[] => {
 		return serverLists.map<List & Deletable>(serverList => ({
 			...serverList,

@@ -1,6 +1,6 @@
 import env from '../environment.json'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
+import { DynamoDBDocument, ScanCommandOutput } from '@aws-sdk/lib-dynamodb'
 import { CreatedUpdated, Deletable, ServerObj, WithId } from '../constants/modelConstants'
 import { getSyncedOn } from '../sync/useSync'
 
@@ -29,16 +29,25 @@ export const scanInDynamoDb = async <T extends WithId>(
 ): Promise<(T & Deletable)[]> => {
 	const client = getClient()
 	try {
-		const { Items } = await client.scan({
-			TableName: table,
-			FilterExpression: filterExpression,
-			ExpressionAttributeValues: expressionAttributeValues,
-		})
-		const parsed = parser(Items as any[] ?? [])
+		let results: any[] = []
+		let ExclusiveStartKey: Record<string, any> | undefined = undefined
+		for (let i = 0; i < 10; i++) { //TODO: increase limit once I know it's working
+			const { Items, LastEvaluatedKey }: ScanCommandOutput = await client.scan({
+				TableName: table,
+				ExclusiveStartKey,
+				FilterExpression: filterExpression,
+				ExpressionAttributeValues: expressionAttributeValues,
+			})
+			if (Items) results.push(...Items as any[])
+			if (!LastEvaluatedKey) break;
+			ExclusiveStartKey = LastEvaluatedKey
+		}
+
+		const parsed = parser(results ?? [])
 		// We have to be very specific in the parsers about what properties to include so we don't get unwanted properties
 		// (such as `serverUpdatedOn`). So now we need to add back in the `deleted` properties.
 		const parsedWithDeleted = parsed.map(p => {
-			if (Items?.find(i => i.id === p.id && i.deleted)) {
+			if (results.find(i => i.id === p.id && i.deleted)) {
 				return {
 					...p,
 					deleted: true,
