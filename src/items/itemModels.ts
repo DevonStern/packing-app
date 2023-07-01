@@ -71,6 +71,28 @@ export const parseItems = (savedItems: Partial<Item>[]): Item[] => {
 	}))
 }
 
+// We have to be very specific in the parsers about what properties to include so we don't get unwanted properties
+// (such as `serverUpdatedOn`).
+export const parseServerItems = (savedItems: Partial<ServerItem>[]): ServerItem[] => {
+	return savedItems.map<ServerItem>((item, i) => ({
+		id: item.id!,
+		listId: item.listId!,
+		assignedToListIds: item.assignedToListIds,
+		overriddenProps: item.overriddenProps,
+		name: item.name!,
+		persons: item.persons ?? [],
+		state: item.state ?? DEFAULT_ITEM_STATE,
+		tags: item.tags ?? [],
+		createdOn: item.createdOn ? new Date(item.createdOn) : new Date(),
+		updatedOn: item.updatedOn ? new Date(item.updatedOn) : new Date(),
+		sortOrder: item.sortOrder ?? i,
+	}))
+}
+
+export const convertServerItemsToItems = (serverItems: (ServerItem & Deletable)[]): (Item & Deletable)[] => {
+	return serverItems.map<Item & Deletable>(({ listId, ...changeWithoutListId }) => changeWithoutListId)
+}
+
 export const didItemChange = (previousItem: Item, currentItem: Item): boolean => {
 	const {
 		assignedToListIds: _p0,
@@ -103,7 +125,7 @@ export const itemsServerOnSetEffect = (getPromise: <S>(recoilValue: RecoilValue<
 			//TODO: scan and see if any of the new values need to be uploaded (don't exist on server, were changed locally more recently, etc.)
 			return
 		}
-		//TODO: sync first?
+		//TODO: fetch from server; do we need to include all from server, not just changes?
 		
 		const newItems: ServerItem[] = newListValues.flatMap(list => {
 			return list.items.map<ServerItem>(item => ({

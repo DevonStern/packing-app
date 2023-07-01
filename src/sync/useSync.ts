@@ -4,6 +4,10 @@ import { TABLE_TAGS, fetchedTagsState, parseTags, tagsState } from "../tags/tagM
 import { SetterOrUpdater, useSetRecoilState } from "recoil";
 import { syncFlag } from "../flags";
 import { TABLE_PERSONS, fetchedPersonsState, parsePersons, personsState } from "../persons/personModel";
+import { CreatedUpdated, Deletable, Sortable, WithId } from "../constants/modelConstants";
+import { TABLE_LISTS, fetchedListsState, listsState, parseServerLists, useListConverter } from "../lists/listModels";
+import { useState } from "react";
+import { Item, TABLE_ITEMS, convertServerItemsToItems, fetchedItemsState, parseServerItems } from "../items/itemModels";
 
 const STORAGE_KEY_SYNC = 'sync'
 
@@ -26,30 +30,43 @@ const useSync = () => {
 	const setTags = useSetRecoilState(tagsState)
 	const setFetchedTags = useSetRecoilState(fetchedTagsState)
 
+	const [allItems, setAllItems] = useState<Item[]>([])
+	const setFetchedItems = useSetRecoilState(fetchedItemsState)
+
+	const setLists = useSetRecoilState(listsState)
+	const setFetchedLists = useSetRecoilState(fetchedListsState)
+	const { convertServerListsToLists } = useListConverter(allItems)
+
 	const sync = async () => {
 		if (!syncFlag) return
 
-		await Promise.all([
-			syncTable(TABLE_PERSONS, parsePersons, setPersons, setFetchedPersons),
-			syncTable(TABLE_TAGS, parseTags, setTags, setFetchedTags),
-		])
+		// Fetch in dependency order
+		await syncTable(TABLE_PERSONS, parsePersons, setPersons, setFetchedPersons)
+		await syncTable(TABLE_TAGS, parseTags, setTags, setFetchedTags)
+		//items before lists so items can be put on lists
+		await syncTable(TABLE_ITEMS, parseServerItems, setAllItems, setFetchedItems, convertServerItemsToItems)
+		await syncTable(TABLE_LISTS, parseServerLists, setLists, setFetchedLists, convertServerListsToLists)
 
 		await setSyncedOnNow()
 	}
 
-	const syncTable = async <T extends WithId & Sortable & CreatedUpdated>(
+	const syncTable = async <
+		T extends WithId & Sortable & CreatedUpdated,
+		ServerT extends WithId & Sortable & CreatedUpdated = T
+	>(
 		tableName: string,
-		parser: (records: Partial<T>[]) => T[],
+		parser: (records: Partial<ServerT>[]) => ServerT[],
 		set: SetterOrUpdater<T[]>,
-		setFetched: SetterOrUpdater<T[]>,
+		setFetched: SetterOrUpdater<(ServerT & Deletable)[]>,
+		converter: (records: (ServerT & Deletable)[]) => (T & Deletable)[] = defaultConverter,
 	) => {
-		const changes = await getChangesFromDynamoDb<T>(tableName, parser)
-		setFetched(changes)
+		console.group(`sync table ${tableName}`)
+		const changes = await getChangesFromServer(tableName, parser, setFetched, converter)
 		if (changes.length > 0) {
 			set(values => {
-				const deletedRemoved: T[] = values.filter(v => !changes.find(change => change.id === v.id && change.deleted))
+				const deletedRemoved = values.filter(v => !changes.find(change => change.id === v.id && change.deleted))
 				console.debug('deleted removed', deletedRemoved)
-				const changesWithoutDeleted: T[] = changes.filter(c => !c.deleted)
+				const changesWithoutDeleted = changes.filter(c => !c.deleted)
 				console.debug('changes without deleted', changesWithoutDeleted)
 				const mergedValues = mergeChanges(deletedRemoved, changesWithoutDeleted)
 				console.debug('merged', mergedValues)
@@ -58,6 +75,26 @@ const useSync = () => {
 				return sortedValues
 			})
 		}
+		console.groupEnd()
+	}
+
+	const defaultConverter = <T, ServerT>(records: ServerT[]): T[] => (records as any as T[])
+
+	const getChangesFromServer = async<
+		T extends WithId & Sortable & CreatedUpdated,
+		ServerT extends WithId & Sortable & CreatedUpdated = T
+	>(
+		tableName: string,
+		parser: (records: Partial<ServerT>[]) => ServerT[],
+		setFetched: SetterOrUpdater<(ServerT & Deletable)[]>,
+		converter: (records: (ServerT & Deletable)[]) => (T & Deletable)[],
+	): Promise<(T & Deletable)[]> => {
+		const rawChanges = await getChangesFromDynamoDb(tableName, parser)
+		console.debug('raw changes', rawChanges)
+		setFetched(rawChanges)
+		const changes = converter(rawChanges)
+		console.debug('converted changes', changes)
+		return changes
 	}
 
 	const mergeChanges = <T extends WithId & CreatedUpdated>(oldValues: T[], changes: T[]): T[] => {

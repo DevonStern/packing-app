@@ -35,20 +35,21 @@ export const parseTags = (tags: Partial<Tag>[]): Tag[] => {
 	}))
 }
 
+const RECORD_TYPE = 'tags'
 const tagsPersistenceInitEffect = (setSelf: (value: Promise<Tag[] | DefaultValue>) => void) => {
 	setSelf(
 		Storage.get({ key: STORAGE_KEY_TAGS })
 			.then(({ value }) => {
 				if (!value) return new DefaultValue()
 				const restoredValue: Tag[] = parseTags(JSON.parse(value))
-				if (logChangesToStoredData) console.log('restored from local storage', restoredValue)
+				if (logChangesToStoredData) console.log(`restored ${RECORD_TYPE} from local storage`, restoredValue)
 				return restoredValue
 			})
 	)
 }
 
 const tagsPersistenceOnSetEffect = (newValue: Tag[]) => {
-	if (logChangesToStoredData) console.log('saving changes to state locally', newValue)
+	if (logChangesToStoredData) console.log(`saving changes to ${RECORD_TYPE} state locally`, newValue)
 	Storage.set({ key: STORAGE_KEY_TAGS, value: JSON.stringify(newValue) })
 }
 
@@ -60,10 +61,11 @@ export const fetchedTagsState = atom<(Tag & Deletable)[]>({
 const tagsServerOnSetEffect = (getPromise: <S>(recoilValue: RecoilValue<S>) => Promise<S>) => {
 	return (newValues: Tag[], oldValues: Tag[] | DefaultValue) => {
 		if (oldValues instanceof DefaultValue) {
-			console.debug('DefaultValue')
+			console.debug(`DefaultValue in ${RECORD_TYPE} server onSet effect`)
 			//TODO: scan and see if any of the new values need to be uploaded (don't exist on server, were changed locally more recently, etc.)
 			return
 		}
+			//TODO: fetch from server
 
 		getPromise(fetchedTagsState).then(fetchedValues => {
 			const changedOrAddedValues: Tag[] = newValues.filter(n => {

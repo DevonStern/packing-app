@@ -57,6 +57,25 @@ export const parseServerLists = (savedLists: Partial<ServerList>[]): ServerList[
 	}))
 }
 
+export const useListConverter = (allItems: Item[]) => {
+	const convertServerListsToLists = (serverLists: (ServerList & Deletable)[]): (List & Deletable)[] => {
+		return serverLists.map<List & Deletable>(serverList => ({
+			...serverList,
+			items: serverList.itemIds.map(itemId => {
+				const matchingItem = allItems.find(potentialMatch => potentialMatch.id === itemId)
+				if (!matchingItem) {
+					throw new Error(`Failed to find matching item when converting server lists: itemId = ${itemId}`)
+				}
+				return matchingItem
+			}),
+		}))
+	}
+
+	return {
+		convertServerListsToLists,
+	}
+}
+
 const MASTER_LIST_ID = 'masterId'
 
 const defaultMasterList: List = {
@@ -104,6 +123,7 @@ export const fetchedListsState = atom<(ServerList & Deletable)[]>({
  * when setSelf gets called. That only works for the setSelf within the same effect.
  */
 const listsEffect: AtomEffect<List[]> = ({ setSelf, onSet, getPromise }) => {
+	const RECORD_TYPE = 'lists'
 
 	const listsPersistenceInitEffect = (setSelf: (value: Promise<List[] | DefaultValue>) => void) => {
 		setSelf(
@@ -111,24 +131,25 @@ const listsEffect: AtomEffect<List[]> = ({ setSelf, onSet, getPromise }) => {
 				.then(({ value }) => {
 					if (!value) return new DefaultValue()
 					const restoredValue: List[] = parseLists(JSON.parse(value))
-					if (logChangesToStoredData) console.log('restored from local storage', restoredValue)
+					if (logChangesToStoredData) console.log(`restored ${RECORD_TYPE} from local storage`, restoredValue)
 					return restoredValue
 				})
 		)
 	}
 
 	const listsPersistenceOnSetEffect = (newValue: List[]) => {
-		if (logChangesToStoredData) console.log('saving changes to state locally', newValue)
+		if (logChangesToStoredData) console.log(`saving changes to ${RECORD_TYPE} state locally`, newValue)
 		Storage.set({ key: STORAGE_KEY_LISTS, value: JSON.stringify(newValue) })
 	}
 
 	const listsServerOnSetEffect = (getPromise: <S>(recoilValue: RecoilValue<S>) => Promise<S>) => {
 		return (newRawValues: List[], oldRawValues: List[] | DefaultValue) => {
 			if (oldRawValues instanceof DefaultValue) {
-				console.debug('DefaultValue')
+				console.debug(`DefaultValue in ${RECORD_TYPE} server onSet effect`)
 				//TODO: scan and see if any of the new values need to be uploaded (don't exist on server, were changed locally more recently, etc.)
 				return
 			}
+			//TODO: fetch from server
 
 			const newPreppedValues: ServerList[] = newRawValues.map<ServerList>(({ items, ...list }) => ({
 				...list,

@@ -35,20 +35,21 @@ export const parsePersons = (persons: Partial<Person>[]): Person[] => {
 	}))
 }
 
+const RECORD_TYPE = 'persons'
 const personsPersistenceInitEffect = (setSelf: (value: Promise<Person[] | DefaultValue>) => void) => {
 	setSelf(
 		Storage.get({ key: STORAGE_KEY_PERSONS })
 			.then(({ value }) => {
 				if (!value) return new DefaultValue()
 				const restoredValue: Person[] = parsePersons(JSON.parse(value))
-				if (logChangesToStoredData) console.log('restored from local storage', restoredValue)
+				if (logChangesToStoredData) console.log(`restored ${RECORD_TYPE} from local storage`, restoredValue)
 				return restoredValue
 			})
 	)
 }
 
 const personsPersistenceOnSetEffect = (newValue: Person[]) => {
-	if (logChangesToStoredData) console.log('saving changes to state locally', newValue)
+	if (logChangesToStoredData) console.log(`saving changes to ${RECORD_TYPE} state locally`, newValue)
 	Storage.set({ key: STORAGE_KEY_PERSONS, value: JSON.stringify(newValue) })
 }
 
@@ -60,10 +61,11 @@ export const fetchedPersonsState = atom<(Person & Deletable)[]>({
 const personsServerOnSetEffect = (getPromise: <S>(recoilValue: RecoilValue<S>) => Promise<S>) => {
 	return (newValues: Person[], oldValues: Person[] | DefaultValue) => {
 		if (oldValues instanceof DefaultValue) {
-			console.debug('DefaultValue')
+			console.debug(`DefaultValue in ${RECORD_TYPE} server onSet effect`)
 			//TODO: scan and see if any of the new values need to be uploaded (don't exist on server, were changed locally more recently, etc.)
 			return
 		}
+			//TODO: fetch from server
 
 		getPromise(fetchedPersonsState).then(fetchedValues => {
 			const changedOrAddedValues: Person[] = newValues.filter(n => {
