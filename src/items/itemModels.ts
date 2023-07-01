@@ -10,16 +10,13 @@ import { markDeletedInDynamoDb, putInDynamoDb } from "../utils/serverUtils";
 export const TABLE_ITEMS = 'Item'
 
 export interface Item extends WithId, CreatedUpdated, Sortable {
+	listId: string
 	assignedToListIds?: string[] //For master list items only
 	overriddenProps?: ('name' | 'persons' | 'state' | 'tags')[] //For trip list items only
 	name: string
 	persons: ItemPerson[]
 	state: ItemState
 	tags: BaseTag[]
-}
-
-export interface ServerItem extends Item {
-	listId: string
 }
 
 export const overridableProps: ('name' | 'persons' | 'state' | 'tags')[] = [
@@ -43,9 +40,10 @@ export interface ItemPerson {
 
 export const DEFAULT_ITEM_STATE = ItemState.NEED
 
-export const makeItem = (name: string, sortOrder: number): Item => ({
+export const makeItem = (listId: string, name: string, sortOrder: number): Item => ({
 	id: uuid(),
 	name,
+	listId,
 	persons: [],
 	state: DEFAULT_ITEM_STATE,
 	tags: [],
@@ -59,23 +57,6 @@ export const makeItem = (name: string, sortOrder: number): Item => ({
 export const parseItems = (savedItems: Partial<Item>[]): Item[] => {
 	return savedItems.map<Item>((item, i) => ({
 		id: item.id!,
-		assignedToListIds: item.assignedToListIds,
-		overriddenProps: item.overriddenProps,
-		name: item.name!,
-		persons: item.persons ?? [],
-		state: item.state ?? DEFAULT_ITEM_STATE,
-		tags: item.tags ?? [],
-		createdOn: item.createdOn ? new Date(item.createdOn) : new Date(),
-		updatedOn: item.updatedOn ? new Date(item.updatedOn) : new Date(),
-		sortOrder: item.sortOrder ?? i,
-	}))
-}
-
-// We have to be very specific in the parsers about what properties to include so we don't get unwanted properties
-// (such as `serverUpdatedOn`).
-export const parseServerItems = (savedItems: Partial<ServerItem>[]): ServerItem[] => {
-	return savedItems.map<ServerItem>((item, i) => ({
-		id: item.id!,
 		listId: item.listId!,
 		assignedToListIds: item.assignedToListIds,
 		overriddenProps: item.overriddenProps,
@@ -87,10 +68,6 @@ export const parseServerItems = (savedItems: Partial<ServerItem>[]): ServerItem[
 		updatedOn: item.updatedOn ? new Date(item.updatedOn) : new Date(),
 		sortOrder: item.sortOrder ?? i,
 	}))
-}
-
-export const convertServerItemsToItems = (serverItems: (ServerItem & Deletable)[]): (Item & Deletable)[] => {
-	return serverItems.map<Item & Deletable>(({ listId, ...changeWithoutListId }) => changeWithoutListId)
 }
 
 export const didItemChange = (previousItem: Item, currentItem: Item): boolean => {
@@ -113,32 +90,24 @@ export const didItemChange = (previousItem: Item, currentItem: Item): boolean =>
 	return JSON.stringify(currentItemToCompare) !== JSON.stringify(previousItemToCompare)
 }
 
-export const fetchedItemsState = atom<(ServerItem & Deletable)[]>({
+export const fetchedItemsState = atom<(Item & Deletable)[]>({
 	key: 'fetchedItemsState',
 	default: [],
 })
 
+const RECORD_TYPE = 'items'
+
 export const itemsServerOnSetEffect = (getPromise: <S>(recoilValue: RecoilValue<S>) => Promise<S>) => {
 	return (newListValues: List[], oldListValues: List[] | DefaultValue) => {
 		if (oldListValues instanceof DefaultValue) {
-			console.debug('DefaultValue')
+			console.debug(`DefaultValue in ${RECORD_TYPE} server onSet effect`)
 			//TODO: scan and see if any of the new values need to be uploaded (don't exist on server, were changed locally more recently, etc.)
 			return
 		}
 		//TODO: fetch from server; do we need to include all from server, not just changes?
 		
-		const newItems: ServerItem[] = newListValues.flatMap(list => {
-			return list.items.map<ServerItem>(item => ({
-				...item,
-				listId: list.id,
-			}))
-		})
-		const oldItems: ServerItem[] = oldListValues.flatMap(list => {
-			return list.items.map<ServerItem>(item => ({
-				...item,
-				listId: list.id,
-			}))
-		})
+		const newItems: Item[] = newListValues.flatMap(list => list.items)
+		const oldItems: Item[] = oldListValues.flatMap(list => list.items)
 
 		getPromise(fetchedItemsState).then(fetchedValues => {
 			const changedOrAddedValues = newItems.filter(n => {

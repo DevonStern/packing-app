@@ -81,7 +81,7 @@ const useListItems = (listId: string) => {
 			const nextSortOrder = oldItems.length > 1 ? oldItems[oldItems.length - 1].sortOrder + 1 : 0
 			return [
 				...oldItems,
-				makeItem(name, nextSortOrder),
+				makeItem(listId, name, nextSortOrder),
 			]
 		})
 	}

@@ -1,13 +1,13 @@
 import { Storage } from "@capacitor/storage";
 import { getChangesFromDynamoDb } from "../utils/serverUtils";
-import { TABLE_TAGS, fetchedTagsState, parseTags, tagsState } from "../tags/tagModel";
+import { TABLE_TAGS, Tag, fetchedTagsState, parseTags, tagsState } from "../tags/tagModel";
 import { SetterOrUpdater, useSetRecoilState } from "recoil";
 import { syncFlag } from "../flags";
-import { TABLE_PERSONS, fetchedPersonsState, parsePersons, personsState } from "../persons/personModel";
+import { Person, TABLE_PERSONS, fetchedPersonsState, parsePersons, personsState } from "../persons/personModel";
 import { CreatedUpdated, Deletable, Sortable, WithId } from "../constants/modelConstants";
-import { TABLE_LISTS, fetchedListsState, listsState, parseServerLists, useListConverter } from "../lists/listModels";
-import { useState } from "react";
-import { Item, TABLE_ITEMS, convertServerItemsToItems, fetchedItemsState, parseServerItems } from "../items/itemModels";
+import { List, ServerList, TABLE_LISTS, fetchedListsState, listsState, parseServerLists, useListConverter } from "../lists/listModels";
+import { useEffect, useState } from "react";
+import { Item, TABLE_ITEMS, fetchedItemsState, parseItems } from "../items/itemModels";
 
 const STORAGE_KEY_SYNC = 'sync'
 
@@ -37,18 +37,20 @@ const useSync = () => {
 	const setFetchedLists = useSetRecoilState(fetchedListsState)
 	const { convertServerListsToLists } = useListConverter(allItems)
 
+	// Fetch in dependency order
 	const sync = async () => {
 		if (!syncFlag) return
 
-		// Fetch in dependency order
-		await syncTable(TABLE_PERSONS, parsePersons, setPersons, setFetchedPersons)
-		await syncTable(TABLE_TAGS, parseTags, setTags, setFetchedTags)
-		//items before lists so items can be put on lists
-		await syncTable(TABLE_ITEMS, parseServerItems, setAllItems, setFetchedItems, convertServerItemsToItems)
-		await syncTable(TABLE_LISTS, parseServerLists, setLists, setFetchedLists, convertServerListsToLists)
+		await syncTable<Person>(TABLE_PERSONS, parsePersons, setPersons, setFetchedPersons)
+		await syncTable<Tag>(TABLE_TAGS, parseTags, setTags, setFetchedTags)
+		// await syncTable<Item>(TABLE_ITEMS, parseItems, setAllItems, setFetchedItems)
 
 		await setSyncedOnNow()
 	}
+	//update item state before syncing lists so items can be put on lists
+	// useEffect(() => {
+	// 	syncTable<List, ServerList>(TABLE_LISTS, parseServerLists, setLists, setFetchedLists, convertServerListsToLists)
+	// }, [allItems])
 
 	const syncTable = async <
 		T extends WithId & Sortable & CreatedUpdated,

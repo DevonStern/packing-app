@@ -62,9 +62,11 @@ export const useListConverter = (allItems: Item[]) => {
 		return serverLists.map<List & Deletable>(serverList => ({
 			...serverList,
 			items: serverList.itemIds.map(itemId => {
-				const matchingItem = allItems.find(potentialMatch => potentialMatch.id === itemId)
+				const matchingItem = allItems.find(potentialMatch => {
+					return potentialMatch.listId === serverList.id && potentialMatch.id === itemId
+				})
 				if (!matchingItem) {
-					throw new Error(`Failed to find matching item when converting server lists: itemId = ${itemId}`)
+					throw new Error(`Failed to find matching item when converting server lists: listId = ${serverList.id}, itemId = ${itemId}`)
 				}
 				return matchingItem
 			}),
