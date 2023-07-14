@@ -74,13 +74,10 @@ const useListItems = (listId: string) => {
 	}
 
 	const createItem = (name: string) => {
-		setItems((oldItems) => {
-			const nextSortOrder = oldItems.length > 1 ? oldItems[oldItems.length - 1].sortOrder + 1 : 0
-			return [
-				...oldItems,
-				makeItem(listId, name, nextSortOrder),
-			]
-		})
+		setItems((oldItems) => [
+			...oldItems,
+			makeItem(listId, name, oldItems.length),
+		])
 	}
 
 	const assignItems = (selectedItems: Item[]) => {
@@ -94,7 +91,7 @@ const useListItems = (listId: string) => {
 				const { assignedToListIds, ...itemWithoutListIds } = item
 				return itemWithoutListIds
 			})
-			let nextSortOrder: number = oldItems.length > 1 ? oldItems[oldItems.length - 1].sortOrder : -1
+			let nextSortOrder: number = oldItems.length - 1
 			const itemsToAdd: Item[] = selectedItemsWithoutListIds.map(item => {
 				nextSortOrder++
 				return {
@@ -104,6 +101,7 @@ const useListItems = (listId: string) => {
 					sortOrder: nextSortOrder,
 				}
 			})
+			console.debug('added list items', [...oldItems, ...itemsToAdd])
 			return [
 				...oldItems,
 				...itemsToAdd,
@@ -125,6 +123,7 @@ const useListItems = (listId: string) => {
 				}
 				return item
 			})
+			console.debug('updated master list items', { ...oldMasterList, items: updatedMasterItems })
 			return {
 				...oldMasterList,
 				items: updatedMasterItems,
@@ -164,7 +163,19 @@ const useListItems = (listId: string) => {
 	}
 
 	const makeListWithItemRemoved = (list: List, item: Item): List => {
-		const updatedItems: Item[] = list.items.filter(i => i.id !== item.id)
+		const index = list.items.findIndex(i => i.id === item.id)
+		if (index === -1) {
+			throw new Error(`Could not find list item to delete: listId = ${list.id}, itemId = ${item.id}`)
+		}
+		const updatedItems: Item[] = [
+			...list.items.slice(0, index),
+			...list.items.slice(index + 1)
+				.map(i => ({
+					...i,
+					sortOrder: i.sortOrder - 1, // Adjust sort orders down
+					updatedOn: new Date(),
+				})),
+		]
 		const updatedList: List = {
 			...list,
 			items: updatedItems,
