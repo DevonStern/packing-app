@@ -20,12 +20,9 @@ const listItemsState = selectorFamily({
 		set(listsState, (previousLists) => {
 			return previousLists.map(list => {
 				if (list.id === listId) {
-					const numberOfItemsChanged = list.items.length !== newItems.length
-					const newUpdatedOn: Date = numberOfItemsChanged ? new Date() : list.updatedOn
 					return {
 						...list,
 						items: newItems,
-						updatedOn: newUpdatedOn,
 					}
 				}
 				return list
@@ -171,7 +168,6 @@ const useListItems = (listId: string) => {
 		const updatedList: List = {
 			...list,
 			items: updatedItems,
-			updatedOn: new Date(),
 		}
 		return updatedList
 	}

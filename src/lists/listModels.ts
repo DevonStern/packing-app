@@ -34,13 +34,13 @@ export const makeList = (name: string, sortOrder: number): List => ({
 export const parseLists = (savedLists: Partial<List & Deletable>[]): List[] => {
 	return savedLists.map<List>((list, i) => {
 		const parsedList = {
-		id: list.id!,
-		name: list.name!,
-		items: parseItems(list.items ?? []),
-		isMaster: list.isMaster ?? false,
-		createdOn: list.createdOn ? new Date(list.createdOn) : new Date(),
-		updatedOn: list.updatedOn ? new Date(list.updatedOn) : new Date(),
-		sortOrder: list.sortOrder ?? i,
+			id: list.id!,
+			name: list.name!,
+			items: parseItems(list.items ?? []),
+			isMaster: list.isMaster ?? false,
+			createdOn: list.createdOn ? new Date(list.createdOn) : new Date(),
+			updatedOn: list.updatedOn ? new Date(list.updatedOn) : new Date(),
+			sortOrder: list.sortOrder ?? i,
 		}
 		if (list.deleted) {
 			return {
@@ -57,12 +57,12 @@ export const parseLists = (savedLists: Partial<List & Deletable>[]): List[] => {
 export const parseServerLists = (savedLists: Partial<ServerList & Deletable>[]): ServerList[] => {
 	return savedLists.map<ServerList>((list, i) => {
 		const parsedList = {
-		id: list.id!,
-		name: list.name!,
-		isMaster: list.isMaster ?? false,
-		createdOn: list.createdOn ? new Date(list.createdOn) : new Date(),
-		updatedOn: list.updatedOn ? new Date(list.updatedOn) : new Date(),
-		sortOrder: list.sortOrder ?? i,
+			id: list.id!,
+			name: list.name!,
+			isMaster: list.isMaster ?? false,
+			createdOn: list.createdOn ? new Date(list.createdOn) : new Date(),
+			updatedOn: list.updatedOn ? new Date(list.updatedOn) : new Date(),
+			sortOrder: list.sortOrder ?? i,
 		}
 		if (list.deleted) {
 			return {
@@ -95,7 +95,7 @@ const defaultMasterList: List = {
 	items: [],
 	isMaster: true,
 	createdOn: new Date(),
-	updatedOn: new Date(),
+	updatedOn: new Date(0), //Never updated, it will be overwritten by sync with the actual master list if one exists on the server
 	sortOrder: 0,
 }
 
