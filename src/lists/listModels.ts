@@ -17,7 +17,7 @@ export interface List extends WithId, CreatedUpdated, Sortable {
 	isMaster: boolean
 }
 
-export type ServerList = Omit<List, 'items'> & { itemIds: string[] }
+export type ServerList = Omit<List, 'items'>
 
 export const makeList = (name: string, sortOrder: number): List => ({
 	id: uuid(),
@@ -59,7 +59,6 @@ export const parseServerLists = (savedLists: Partial<ServerList & Deletable>[]):
 		const parsedList = {
 		id: list.id!,
 		name: list.name!,
-		itemIds: list.itemIds ?? [],
 		isMaster: list.isMaster ?? false,
 		createdOn: list.createdOn ? new Date(list.createdOn) : new Date(),
 		updatedOn: list.updatedOn ? new Date(list.updatedOn) : new Date(),
@@ -79,15 +78,7 @@ export const makeListConverter = (allItems: Item[]) => {
 	const convertServerListsToLists = (serverLists: (ServerList & Deletable)[]): (List & Deletable)[] => {
 		return serverLists.map<List & Deletable>(serverList => ({
 			...serverList,
-			items: serverList.itemIds.map(itemId => {
-				const matchingItem = allItems.find(potentialMatch => {
-					return potentialMatch.listId === serverList.id && potentialMatch.id === itemId
-				})
-				if (!matchingItem) {
-					throw new Error(`Failed to find matching item when converting server lists: listId = ${serverList.id}, itemId = ${itemId}`)
-				}
-				return matchingItem
-			}),
+			items: allItems.filter(item => item.listId === serverList.id),
 		}))
 	}
 
@@ -173,11 +164,9 @@ const listsEffect: AtomEffect<List[]> = ({ setSelf, onSet, getPromise }) => {
 
 			const newPreppedValues: ServerList[] = newRawValues.map<ServerList>(({ items, ...list }) => ({
 				...list,
-				itemIds: items.map(i => i.id),
 			}))
 			const oldPreppedValues: ServerList[] = oldRawValues.map<ServerList>(({ items, ...list }) => ({
 				...list,
-				itemIds: items.map(i => i.id),
 			}))
 
 			getPromise(fetchedListsState).then(fetchedValues => {
