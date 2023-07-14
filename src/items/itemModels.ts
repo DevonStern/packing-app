@@ -54,8 +54,9 @@ export const makeItem = (listId: string, name: string, sortOrder: number): Item 
 
 // We have to be very specific in the parsers about what properties to include so we don't get unwanted properties
 // (such as `serverUpdatedOn`).
-export const parseItems = (savedItems: Partial<Item>[]): Item[] => {
-	return savedItems.map<Item>((item, i) => ({
+export const parseItems = (savedItems: Partial<Item & Deletable>[]): Item[] => {
+	return savedItems.map<Item>((item, i) => {
+		const parsedItem = {
 		id: item.id!,
 		listId: item.listId!,
 		assignedToListIds: item.assignedToListIds,
@@ -67,7 +68,15 @@ export const parseItems = (savedItems: Partial<Item>[]): Item[] => {
 		createdOn: item.createdOn ? new Date(item.createdOn) : new Date(),
 		updatedOn: item.updatedOn ? new Date(item.updatedOn) : new Date(),
 		sortOrder: item.sortOrder ?? i,
-	}))
+		}
+		if (item.deleted) {
+			return {
+				...parsedItem,
+				deleted: true,
+			}
+		}
+		return parsedItem
+	})
 }
 
 export const didItemChange = (previousItem: Item, currentItem: Item): boolean => {

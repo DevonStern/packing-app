@@ -25,14 +25,23 @@ export const makeTag = (name: string, sortOrder: number): Tag => ({
 
 // We have to be very specific in the parsers about what properties to include so we don't get unwanted properties
 // (such as `serverUpdatedOn`).
-export const parseTags = (tags: Partial<Tag>[]): Tag[] => {
-	return tags.map<Tag>((tag, i) => ({
-		id: tag.id!,
-		name: tag.name!,
-		createdOn: tag.createdOn ? new Date(tag.createdOn) : new Date(),
-		updatedOn: tag.updatedOn ? new Date(tag.updatedOn) : new Date(),
-		sortOrder: tag.sortOrder ?? i,
-	}))
+export const parseTags = (tags: Partial<Tag & Deletable>[]): Tag[] => {
+	return tags.map<Tag>((tag, i) => {
+		const parsedTag = {
+			id: tag.id!,
+			name: tag.name!,
+			createdOn: tag.createdOn ? new Date(tag.createdOn) : new Date(),
+			updatedOn: tag.updatedOn ? new Date(tag.updatedOn) : new Date(),
+			sortOrder: tag.sortOrder ?? i,
+		}
+		if (tag.deleted) {
+			return {
+				...parsedTag,
+				deleted: true,
+			}
+		}
+		return parsedTag
+	})
 }
 
 const RECORD_TYPE = 'tags'

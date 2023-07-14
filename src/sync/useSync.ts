@@ -86,7 +86,7 @@ const useSync = () => {
 		converter = defaultConverter,
 	}: {
 		tableName: string,
-		parser: (records: Partial<ServerT>[]) => ServerT[],
+		parser: (records: Partial<ServerT & Deletable>[]) => ServerT[],
 		set: SetterOrUpdater<T[]>,
 		setFetched: SetterOrUpdater<(ServerT & Deletable)[]>,
 		converter?: (records: (ServerT & Deletable)[]) => (T & Deletable)[],
@@ -125,7 +125,7 @@ const useSync = () => {
 		ServerT extends WithId & Sortable & CreatedUpdated = T
 	>(
 		tableName: string,
-		parser: (records: Partial<ServerT>[]) => ServerT[],
+		parser: (records: Partial<ServerT & Deletable>[]) => ServerT[],
 		setFetched: SetterOrUpdater<(ServerT & Deletable)[]>,
 		converter: (records: (ServerT & Deletable)[]) => (T & Deletable)[],
 	): Promise<(T & Deletable)[]> => {

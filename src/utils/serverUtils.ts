@@ -21,12 +21,12 @@ const getClient = () => {
 	return docClient
 }
 
-export const scanInDynamoDb = async <T extends WithId>(
+export const scanInDynamoDb = async <T extends WithId & Deletable>(
 	table: string,
 	parser: (records: Partial<T>[]) => T[],
 	filterExpression?: string,
 	expressionAttributeValues?: any,
-): Promise<(T & Deletable)[]> => {
+): Promise<T[]> => {
 	const client = getClient()
 	try {
 		let results: any[] = []
@@ -40,33 +40,23 @@ export const scanInDynamoDb = async <T extends WithId>(
 			})
 			if (Items) results.push(...Items as any[])
 			if (!LastEvaluatedKey) break;
+			console.warn('We actually got a LastEvaluatedKey during the scan! Pagination, here we come!')
 			ExclusiveStartKey = LastEvaluatedKey
 		}
 
 		const parsed = parser(results ?? [])
-		// We have to be very specific in the parsers about what properties to include so we don't get unwanted properties
-		// (such as `serverUpdatedOn`). So now we need to add back in the `deleted` properties.
-		const parsedWithDeleted = parsed.map(p => {
-			if (results.find(i => i.id === p.id && i.deleted)) {
-				return {
-					...p,
-					deleted: true,
-				}
-			}
-			return p
-		})
-		console.log('scanned in DynamoDB', parsedWithDeleted)
-		return parsedWithDeleted
+		console.log('scanned in DynamoDB', parsed)
+		return parsed
 	} catch (error) {
 		console.error('Failed to scan items from DynamoDB', error)
 		throw error
 	}
 }
 
-export const getChangesFromDynamoDb = async <T extends WithId>(
+export const getChangesFromDynamoDb = async <T extends WithId & Deletable>(
 	table: string,
 	parser: (records: Partial<T>[]) => T[],
-): Promise<(T & Deletable)[]> => {
+): Promise<T[]> => {
 	const syncedOn: Date = await getSyncedOn()
 	const expressionAttributeValues = {
 		":so": syncedOn.toISOString(),

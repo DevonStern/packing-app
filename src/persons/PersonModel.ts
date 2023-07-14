@@ -25,14 +25,23 @@ export const makePerson = (name: string, sortOrder: number): Person => ({
 
 // We have to be very specific in the parsers about what properties to include so we don't get unwanted properties
 // (such as `serverUpdatedOn`).
-export const parsePersons = (persons: Partial<Person>[]): Person[] => {
-	return persons.map<Person>((person, i) => ({
-		id: person.id!,
-		name: person.name!,
-		createdOn: person.createdOn ? new Date(person.createdOn) : new Date(),
-		updatedOn: person.updatedOn ? new Date(person.updatedOn) : new Date(),
-		sortOrder: person.sortOrder ?? i,
-	}))
+export const parsePersons = (persons: Partial<Person & Deletable>[]): Person[] => {
+	return persons.map<Person>((person, i) => {
+		const parsedPerson = {
+			id: person.id!,
+			name: person.name!,
+			createdOn: person.createdOn ? new Date(person.createdOn) : new Date(),
+			updatedOn: person.updatedOn ? new Date(person.updatedOn) : new Date(),
+			sortOrder: person.sortOrder ?? i,
+		}
+		if (person.deleted) {
+			return {
+				...parsedPerson,
+				deleted: true,
+			}
+		}
+		return parsedPerson
+	})
 }
 
 const RECORD_TYPE = 'persons'

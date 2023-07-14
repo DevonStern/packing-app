@@ -31,8 +31,9 @@ export const makeList = (name: string, sortOrder: number): List => ({
 
 // We have to be very specific in the parsers about what properties to include so we don't get unwanted properties
 // (such as `serverUpdatedOn`).
-export const parseLists = (savedLists: Partial<List>[]): List[] => {
-	return savedLists.map<List>((list, i) => ({
+export const parseLists = (savedLists: Partial<List & Deletable>[]): List[] => {
+	return savedLists.map<List>((list, i) => {
+		const parsedList = {
 		id: list.id!,
 		name: list.name!,
 		items: parseItems(list.items ?? []),
@@ -40,13 +41,22 @@ export const parseLists = (savedLists: Partial<List>[]): List[] => {
 		createdOn: list.createdOn ? new Date(list.createdOn) : new Date(),
 		updatedOn: list.updatedOn ? new Date(list.updatedOn) : new Date(),
 		sortOrder: list.sortOrder ?? i,
-	}))
+		}
+		if (list.deleted) {
+			return {
+				...parsedList,
+				deleted: true,
+			}
+		}
+		return parsedList
+	})
 }
 
 // We have to be very specific in the parsers about what properties to include so we don't get unwanted properties
 // (such as `serverUpdatedOn`).
-export const parseServerLists = (savedLists: Partial<ServerList>[]): ServerList[] => {
-	return savedLists.map<ServerList>((list, i) => ({
+export const parseServerLists = (savedLists: Partial<ServerList & Deletable>[]): ServerList[] => {
+	return savedLists.map<ServerList>((list, i) => {
+		const parsedList = {
 		id: list.id!,
 		name: list.name!,
 		itemIds: list.itemIds ?? [],
@@ -54,7 +64,15 @@ export const parseServerLists = (savedLists: Partial<ServerList>[]): ServerList[
 		createdOn: list.createdOn ? new Date(list.createdOn) : new Date(),
 		updatedOn: list.updatedOn ? new Date(list.updatedOn) : new Date(),
 		sortOrder: list.sortOrder ?? i,
-	}))
+		}
+		if (list.deleted) {
+			return {
+				...parsedList,
+				deleted: true,
+			}
+		}
+		return parsedList
+	})
 }
 
 export const makeListConverter = (allItems: Item[]) => {
