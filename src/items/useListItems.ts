@@ -96,6 +96,7 @@ const useListItems = (listId: string) => {
 				nextSortOrder++
 				return {
 					...item,
+					listId,
 					createdOn: new Date(),
 					updatedOn: new Date(),
 					sortOrder: nextSortOrder,

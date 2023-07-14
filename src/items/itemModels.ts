@@ -57,17 +57,17 @@ export const makeItem = (listId: string, name: string, sortOrder: number): Item 
 export const parseItems = (savedItems: Partial<Item & Deletable>[]): Item[] => {
 	return savedItems.map<Item>((item, i) => {
 		const parsedItem = {
-		id: item.id!,
-		listId: item.listId!,
-		assignedToListIds: item.assignedToListIds,
-		overriddenProps: item.overriddenProps,
-		name: item.name!,
-		persons: item.persons ?? [],
-		state: item.state ?? DEFAULT_ITEM_STATE,
-		tags: item.tags ?? [],
-		createdOn: item.createdOn ? new Date(item.createdOn) : new Date(),
-		updatedOn: item.updatedOn ? new Date(item.updatedOn) : new Date(),
-		sortOrder: item.sortOrder ?? i,
+			id: item.id!,
+			listId: item.listId!,
+			assignedToListIds: item.assignedToListIds,
+			overriddenProps: item.overriddenProps,
+			name: item.name!,
+			persons: item.persons ?? [],
+			state: item.state ?? DEFAULT_ITEM_STATE,
+			tags: item.tags ?? [],
+			createdOn: item.createdOn ? new Date(item.createdOn) : new Date(),
+			updatedOn: item.updatedOn ? new Date(item.updatedOn) : new Date(),
+			sortOrder: item.sortOrder ?? i,
 		}
 		if (item.deleted) {
 			return {
@@ -116,33 +116,52 @@ export const itemsServerOnSetEffect = (getPromise: <S>(recoilValue: RecoilValue<
 		//TODO: fetch from server; do we need to include all from server, not just changes?
 		
 		const newItems: Item[] = newListValues.flatMap(list => list.items)
+			console.debug('newItems', newItems)
 		const oldItems: Item[] = oldListValues.flatMap(list => list.items)
+		console.debug('oldItems', oldItems)
 
 		getPromise(fetchedItemsState).then(fetchedValues => {
+			console.debug('fetchedItems', fetchedValues)
 			const changedOrAddedValues = newItems.filter(n => {
-				const o = oldItems.find(possibleMatch => possibleMatch.id === n.id)
+				// console.debug('n', n)
+				const o = oldItems.find(possibleMatch => possibleMatch.id === n.id && possibleMatch.listId === n.listId)
+				// console.debug('o', o)
 				const changedOrAdded: boolean = !o || JSON.stringify(o) !== JSON.stringify(n)
+				// console.debug('changedOrAdded', changedOrAdded)
 				return changedOrAdded
 			})
 			console.debug('before comparing changed to fetched', changedOrAddedValues)
 			// Prevent sending to server when it was just fetched from server
-			const differentFromServer = changedOrAddedValues.filter(newValue => {
-				const fetched = fetchedValues.find(possibleMatch => possibleMatch.id === newValue.id)
+			const differentFromServer = changedOrAddedValues.filter((newValue, i) => {
+				// if (i > 0) return false
+				// console.debug('newValue', newValue)
+				const fetched = fetchedValues.find(possibleMatch =>
+					possibleMatch.id === newValue.id && possibleMatch.listId === newValue.listId
+				)
+				// console.debug('fetched', fetched)
 				const differentFromServer: boolean = !fetched || JSON.stringify(fetched) !== JSON.stringify(newValue)
+				if (differentFromServer) {
+					console.debug('different from server')
+					console.debug('newValue', newValue)
+					console.debug('fetched', fetched)
+				}
+				// console.debug('differentFromServer', differentFromServer)
 				return differentFromServer
 			})
 			if (logChangesToServerData) console.log('saving changed or added values to server', differentFromServer)
 			differentFromServer.forEach((value) => putInDynamoDb(TABLE_ITEMS, value))
 
 			const deletedValues = oldItems.filter(o => {
-				const n = newItems.find(possibleMatch => possibleMatch.id === o.id)
+				const n = newItems.find(possibleMatch => possibleMatch.id === o.id && possibleMatch.listId === o.listId)
 				const deleted: boolean = !n
 				return deleted
 			})
 			console.debug('before comparing deleted to fetched', deletedValues)
 			// Prevent sending to server when it was just fetched from server
 			const notDeletedOnServer = deletedValues.filter(oldValue => {
-				const fetched = fetchedValues.find(possibleMatch => possibleMatch.id === oldValue.id)
+				const fetched = fetchedValues.find(possibleMatch =>
+					possibleMatch.id === oldValue.id && possibleMatch.listId === oldValue.listId
+				)
 				const notDeletedOnServer: boolean = !fetched || !fetched.hasOwnProperty('deleted')
 				return notDeletedOnServer
 			})
