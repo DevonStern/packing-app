@@ -1,13 +1,13 @@
 import { Storage } from "@capacitor/storage";
 import { getChangesFromDynamoDb } from "../utils/serverUtils";
 import { TABLE_TAGS, Tag, fetchedTagsState, parseTags, tagsState } from "../tags/tagModel";
-import { SetterOrUpdater, useSetRecoilState } from "recoil";
+import { SetterOrUpdater, useRecoilState, useSetRecoilState } from "recoil";
 import { syncFlag } from "../flags";
 import { Person, TABLE_PERSONS, fetchedPersonsState, parsePersons, personsState } from "../persons/personModel";
 import { CreatedUpdated, Deletable, Sortable, WithId } from "../constants/modelConstants";
 import { List, ServerList, TABLE_LISTS, fetchedListsState, listsState, parseServerLists, makeListConverter } from "../lists/listModels";
 import { useEffect, useState } from "react";
-import { Item, TABLE_ITEMS, fetchedItemsState, parseItems } from "../items/itemModels";
+import { Item, TABLE_ITEMS, allItemsState, fetchedItemsState, parseItems } from "../items/itemModels";
 
 const STORAGE_KEY_SYNC = 'sync'
 
@@ -30,11 +30,16 @@ const useSync = () => {
 	const setTags = useSetRecoilState(tagsState)
 	const setFetchedTags = useSetRecoilState(fetchedTagsState)
 
-	const [_, setAllItems] = useState<Item[]>([])
-	const setFetchedItems = useSetRecoilState(fetchedItemsState)
-
 	const setLists = useSetRecoilState(listsState)
 	const setFetchedLists = useSetRecoilState(fetchedListsState)
+
+	const [allItems, setAllItems] = useRecoilState(allItemsState)
+	const setFetchedItems = useSetRecoilState(fetchedItemsState)
+
+	useEffect(() => {
+		console.debug('allItems', allItems)
+		console.debug('master list items', allItems.filter(i => i.listId === 'masterId'))
+	}, [allItems])
 
 	const sync = async () => {
 		if (!syncFlag) return
@@ -52,15 +57,7 @@ const useSync = () => {
 			set: setTags,
 			setFetched: setFetchedTags,
 		})
-		//update item state before syncing lists so items can be put on lists
-		const allItems = await syncTable<Item>({
-			tableName: TABLE_ITEMS,
-			parser: parseItems,
-			set: setAllItems,
-			setFetched: setFetchedItems,
-		})
-		console.debug('allItems from server', allItems)
-		console.debug('master list items from server', allItems.filter(i => i.listId === 'masterId'))
+		// Sync lists before items so we can update the items on the lists afterward
 		const { convertServerListsToLists } = makeListConverter(allItems)
 		await syncTable<List, ServerList>({
 			tableName: TABLE_LISTS,
@@ -68,6 +65,12 @@ const useSync = () => {
 			set: setLists,
 			setFetched: setFetchedLists,
 			converter: convertServerListsToLists,
+		})
+		await syncTable<Item>({
+			tableName: TABLE_ITEMS,
+			parser: parseItems,
+			set: setAllItems,
+			setFetched: setFetchedItems,
 		})
 
 		await setSyncedOnNow()
@@ -88,13 +91,12 @@ const useSync = () => {
 		set: SetterOrUpdater<T[]>,
 		setFetched: SetterOrUpdater<(ServerT & Deletable)[]>,
 		converter?: (records: (ServerT & Deletable)[]) => (T & Deletable)[],
-	}): Promise<T[]> => {
+	}) => {
 		console.group(`sync table ${tableName}`)
-		let newValues: T[] = []
 		const changes = await getChangesFromServer(tableName, parser, setFetched, converter)
 		if (changes.length > 0) {
 			set(values => {
-				const deletedRemoved = changes[0].hasOwnProperty('listId') ?
+				const currentWithoutDeleted = changes[0].hasOwnProperty('listId') ?
 					values.filter(v => !changes.find(change =>
 						change.id === v.id &&
 						(change as any).listId === (v as any).listId &&
@@ -104,29 +106,21 @@ const useSync = () => {
 						change.id === v.id &&
 						change.deleted
 					))
-				console.debug('deleted removed', deletedRemoved)
+				console.debug('current without deleted', currentWithoutDeleted)
 				// console.debug('deleted removed', deletedRemoved.filter(r => r.id === 'e223571d-2d14-4fb9-8910-eb2b30445a38'))
 				const changesWithoutDeleted = changes.filter(c => !c.deleted)
 				console.debug('changes without deleted', changesWithoutDeleted)
 				// console.debug('changes without deleted', changesWithoutDeleted.filter(r => r.id === 'e223571d-2d14-4fb9-8910-eb2b30445a38'))
-				const mergedValues = mergeChanges(deletedRemoved, changesWithoutDeleted)
+				const mergedValues = mergeChanges(currentWithoutDeleted, changesWithoutDeleted)
 				console.debug('merged', mergedValues)
 				// console.debug('merged', mergedValues.filter(r => r.id === 'e223571d-2d14-4fb9-8910-eb2b30445a38'))
 				const sortedValues = groupAndSort(mergedValues)
 				console.debug('sorted', sortedValues)
 				// console.debug('sorted', sortedValues.filter(r => r.id === 'e223571d-2d14-4fb9-8910-eb2b30445a38'))
-				newValues = sortedValues
 				return sortedValues
 			})
-		} else {
-			set(values => {
-				newValues = values
-				return values
-			})
 		}
-		console.debug('resulting values', newValues)
 		console.groupEnd()
-		return newValues
 	}
 
 	const defaultConverter = <T, ServerT>(records: ServerT[]): T[] => (records as any as T[])

@@ -2,8 +2,8 @@ import { v4 as uuid } from "uuid";
 import { BasePerson } from "../persons/personModel";
 import { BaseTag } from "../tags/tagModel";
 import { CreatedUpdated, Deletable, Sortable, WithId } from "../constants/modelConstants";
-import { DefaultValue, RecoilValue, atom } from "recoil";
-import { List } from "../lists/listModels";
+import { DefaultValue, RecoilValue, atom, selector } from "recoil";
+import { List, listsState } from "../lists/listModels";
 import { logChangesToServerData } from "../flags";
 import { markDeletedInDynamoDb, putInDynamoDb } from "../utils/serverUtils";
 
@@ -170,3 +170,25 @@ export const itemsServerOnSetEffect = (getPromise: <S>(recoilValue: RecoilValue<
 		})
 	}
 }
+
+export const allItemsState = selector<Item[]>({
+	key: 'allItemsState',
+	get: ({ get }) => {
+		const lists = get(listsState)
+		return lists.flatMap(l => l.items)
+	},
+	set: ({ set }, updatedAllItems) => {
+		if (updatedAllItems instanceof DefaultValue) {
+			throw new Error("I don't know what the heck is going on.")
+		}
+		set(listsState, (prevLists) => {
+			return prevLists.map(list => {
+				const updatedItems = updatedAllItems.filter(i => i.listId === list.id)
+				return {
+					...list,
+					items: updatedItems,
+				}
+			})
+		})
+	}
+})
