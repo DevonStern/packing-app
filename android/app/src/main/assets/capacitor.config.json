@@ -1,5 +1,5 @@
 {
-	"appId": "io.ionic.starter",
+	"appId": "me.devonstern.packing",
 	"appName": "packing-app",
 	"webDir": "build",
 	"bundledWebRuntime": false

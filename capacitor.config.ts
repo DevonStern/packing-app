@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
+  appId: 'me.devonstern.packing',
   appName: 'packing-app',
   webDir: 'build',
   bundledWebRuntime: false
