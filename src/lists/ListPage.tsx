@@ -5,6 +5,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { multiSelectState } from '../state/state';
 import { List, listsState } from './listModels';
 import ListView from './ListView';
+import ErrorPage from '../error/ErrorPage';
 
 interface ListPageProps extends RouteComponentProps<{
 	listId: string
@@ -17,7 +18,7 @@ const ListPage: React.FC<ListPageProps> = ({ match: { params: { listId } } }) =>
 	const list: List | undefined = lists.find(l => l.id === listId)
 	if (!list) {
 		console.error(`Invalid listId param in route: ${listId}`)
-		return <>Error</>
+		return <ErrorPage />
 	}
 
 	return (

@@ -7,6 +7,7 @@ import { List, listsState } from "../lists/listModels"
 import { Item } from "./itemModels"
 import ItemView from "./ItemView"
 import useListItems from "./useListItems"
+import ErrorPage from "../error/ErrorPage"
 
 interface ItemPageProps extends RouteComponentProps<{
 	listId: string
@@ -21,7 +22,7 @@ const ItemPage: React.FC<ItemPageProps> = ({ match: { params: { listId, itemId }
 	const item: Item | undefined = list?.items.find(i => i.id === itemId)
 	if (!list || !item) {
 		console.error(`Invalid listId or itemId param in route: listId = ${listId}, itemId = ${itemId}`)
-		return <>Error</>
+		return <ErrorPage />
 	}
 
 	return (
