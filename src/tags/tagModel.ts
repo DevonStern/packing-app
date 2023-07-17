@@ -1,4 +1,4 @@
-import { AtomEffect, DefaultValue, RecoilValue, atom } from "recoil";
+import { AtomEffect, DefaultValue, RecoilValue, atom, selector } from "recoil";
 import { v4 as uuid } from "uuid";
 import { makePersistenceEffect } from "../utils/persistenceUtils";
 import { markDeletedInDynamoDb, putInDynamoDb } from "../utils/serverUtils";
@@ -128,4 +128,14 @@ export const tagsState = atom<Tag[]>({
 		tagsEffect,
 		// makePersistenceEffect(STORAGE_KEY_TAGS, tagsRestorer),
 	],
+})
+
+export const baseTagsState = selector<BaseTag[]>({
+	key: 'baseTagsState',
+	get: ({ get }) => {
+		return get(tagsState).map<BaseTag>(({ id, name }) => ({
+			id,
+			name,
+		}))
+	}
 })

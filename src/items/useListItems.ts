@@ -1,7 +1,7 @@
 import { DefaultValue, selectorFamily, useRecoilState, useRecoilValue, useSetRecoilState } from "recoil"
 import { List, listsState, masterListState } from "../lists/listModels"
-import { Person, personsState } from "../persons/personModel"
-import { Tag, tagsState } from "../tags/tagModel"
+import { BasePerson, basePersonsState } from "../persons/personModel"
+import { BaseTag, baseTagsState } from "../tags/tagModel"
 import { makeItemPersonWithNextState } from "../utils/itemStateUtils"
 import { DEFAULT_ITEM_STATE, Item, ItemPerson, ItemState, makeItem } from "./itemModels"
 import useItemUpdates from "./useItemUpdates"
@@ -35,8 +35,8 @@ const useListItems = (listId: string) => {
 	const setLists = useSetRecoilState(listsState)
 	const [{ id: masterListId }, setMasterList] = useRecoilState(masterListState)
 	const setItems = useSetRecoilState(listItemsState(listId))
-	const persons = useRecoilValue(personsState)
-	const tags = useRecoilValue(tagsState)
+	const basePersons = useRecoilValue(basePersonsState)
+	const baseTags = useRecoilValue(baseTagsState)
 
 	const isMasterList = listId === masterListId
 	const { makeItemWithOverriddenPropIfNeeded } = useItemUpdates(isMasterList)
@@ -266,11 +266,11 @@ const useListItems = (listId: string) => {
 	}
 
 	const updateItemPersonsOnItems = (selectedItems: Item[], personIds: string[]) => {
-		const updatedPersons: Person[] = persons.filter(p => personIds.some(id => id === p.id))
+		const updatedPersons = basePersons.filter(p => personIds.some(id => id === p.id))
 		setSelectedItems(selectedItems, updatedPersons, makeItemWithUpdatedPersons)
 	}
 
-	const makeItemWithUpdatedPersons = (item: Item, updatedPersons: Person[]): Item => {
+	const makeItemWithUpdatedPersons = (item: Item, updatedPersons: BasePerson[]): Item => {
 		const itemWithOverriddenProp: Item = makeItemWithOverriddenPropIfNeeded(item, 'persons')
 		const updatedItemPersons: ItemPerson[] = updatedPersons.map(person => {
 			const currentItemPerson: ItemPerson | undefined = itemWithOverriddenProp.persons.find(ip => ip.person.id === person.id)
@@ -288,11 +288,11 @@ const useListItems = (listId: string) => {
 	}
 
 	const updateTagsOnItems = (selectedItems: Item[], tagIds: string[]) => {
-		const updatedTags: Tag[] = tags.filter(t => tagIds.some(id => id === t.id))
+		const updatedTags = baseTags.filter(t => tagIds.some(id => id === t.id))
 		setSelectedItems(selectedItems, updatedTags, makeItemWithUpdatedTags)
 	}
 
-	const makeItemWithUpdatedTags = (item: Item, tags: Tag[]): Item => {
+	const makeItemWithUpdatedTags = (item: Item, tags: BaseTag[]): Item => {
 		const itemWithOverriddenProp: Item = makeItemWithOverriddenPropIfNeeded(item, 'tags')
 		const updatedItem: Item = {
 			...itemWithOverriddenProp,
@@ -302,13 +302,13 @@ const useListItems = (listId: string) => {
 	}
 
 	const addTagsOnItems = (selectedItems: Item[], tagIds: string[]) => {
-		const addedTags: Tag[] = tags.filter(t => tagIds.some(id => id === t.id))
+		const addedTags = baseTags.filter(t => tagIds.some(id => id === t.id))
 		setSelectedItems(selectedItems, addedTags, makeItemWithAddedTags)
 	}
 
-	const makeItemWithAddedTags = (item: Item, tags: Tag[]): Item => {
+	const makeItemWithAddedTags = (item: Item, tags: BaseTag[]): Item => {
 		const itemWithOverriddenProp: Item = makeItemWithOverriddenPropIfNeeded(item, 'tags')
-		const newTags: Tag[] = tags.filter(t => !item.tags.some(it => it.id === t.id))
+		const newTags: BaseTag[] = tags.filter(t => !item.tags.some(it => it.id === t.id))
 		const updatedItem: Item = {
 			...itemWithOverriddenProp,
 			tags: [

@@ -1,4 +1,4 @@
-import { AtomEffect, DefaultValue, RecoilValue, atom } from "recoil";
+import { AtomEffect, DefaultValue, RecoilValue, atom, selector } from "recoil";
 import { v4 as uuid } from "uuid";
 import { makePersistenceEffect } from "../utils/persistenceUtils";
 import { CreatedUpdated, Deletable, Sortable, WithId } from "../constants/modelConstants";
@@ -128,4 +128,14 @@ export const personsState = atom<Person[]>({
 		personsEffect,
 		// makePersistenceEffect(STORAGE_KEY_PERSONS, personsRestorer),
 	],
+})
+
+export const basePersonsState = selector<BasePerson[]>({
+	key: 'basePersonsState',
+	get: ({ get }) => {
+		return get(personsState).map<BasePerson>(({ id, name }) => ({
+			id,
+			name,
+		}))
+	}
 })
