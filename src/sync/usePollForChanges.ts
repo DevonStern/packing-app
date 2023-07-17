@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { syncInterval, syncOnAppActive } from '../flags';
 import { useInterval } from '../utils/useInterval';
 import useSync from './useSync';
@@ -10,13 +11,18 @@ const usePollForChanges = () => {
 		sync();
 	}, syncInterval);
 
-	if (syncOnAppActive) {
-		App.addListener('appStateChange', (state: AppState) => {
-			if (state.isActive) {
-				sync()
+	useEffect(() => {
+		if (syncOnAppActive) {
+			const listener = App.addListener('appStateChange', (state: AppState) => {
+				if (state.isActive) {
+					sync()
+				}
+			})
+			return () => {
+				listener.remove()
 			}
-		})
-	}
+		}
+	}, [syncOnAppActive])
 }
 
 export default usePollForChanges;

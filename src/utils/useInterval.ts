@@ -22,9 +22,11 @@ export const useInterval = (callback: (...args: any[]) => void, delay: number, r
 		return () => clearInterval(id);
 	}, [delay, isAppInBackground]);
 
-	if (!runInBackground) {
-		App.addListener('appStateChange', (state: AppState) => {
-			setIsAppInBackground(!state.isActive);
-		});
-	}
+	useEffect(() => {
+		if (!runInBackground) {
+			App.addListener('appStateChange', (state: AppState) => {
+				setIsAppInBackground(!state.isActive);
+			});
+		}
+	}, [runInBackground, setIsAppInBackground])
 };
